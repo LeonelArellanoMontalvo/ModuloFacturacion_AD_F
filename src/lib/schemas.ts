@@ -8,12 +8,15 @@ export const tipoClienteSchema = z.object({
 export const clienteSchema = z.object({
   nombre: z.string().min(2, "El nombre es requerido."),
   apellido: z.string().min(2, "El apellido es requerido."),
+  tipo_identificacion: z.string({ required_error: "Seleccione un tipo de identificación." }).min(1, "Seleccione un tipo de identificación."),
+  numero_identificacion: z.string().min(5, "El número de identificación es requerido.").regex(/^\d+$/, "El número de identificación solo debe contener dígitos."),
   direccion: z.string().min(5, "La dirección es requerida."),
   telefono: z.string().regex(/^\d{7,10}$/, "Ingrese un número de teléfono válido (7-10 dígitos)."),
-  email: z.string().email("Ingrese un correo electrónico válido."),
-  id_tipo_cliente: z.coerce.number().min(1, "Seleccione un tipo de cliente."),
-  estado: z.boolean(),
+  correo_electronico: z.string().email("Ingrese un correo electrónico válido."),
+  id_tipo_cliente: z.coerce.number({ required_error: "Seleccione un tipo de cliente." }).min(1, "Seleccione un tipo de cliente."),
+  estado: z.string({ required_error: "Seleccione un estado." }).min(1, "Seleccione un estado."),
 });
+
 
 export const facturaHeaderSchema = z.object({
   id_cliente: z.coerce.number().min(1, "Debe seleccionar un cliente."),

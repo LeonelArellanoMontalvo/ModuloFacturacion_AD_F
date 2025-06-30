@@ -36,7 +36,7 @@ export const getColumns = (
             <DropdownMenuItem onClick={() => onEdit(cliente)}>
               Editar
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onDelete(cliente.id)} className="text-destructive">
+            <DropdownMenuItem onClick={() => onDelete(cliente.id_cliente)} className="text-destructive">
               Eliminar
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -50,24 +50,29 @@ export const getColumns = (
     cell: ({ row }) => `${row.original.nombre} ${row.original.apellido}`,
   },
   {
-    accessorKey: "email",
-    header: "Email",
+    header: "Identificación",
+    cell: ({ row }) => `${row.original.tipo_identificacion}: ${row.original.numero_identificacion}`,
+  },
+  {
+    accessorKey: "correo_electronico",
+    header: "Correo Electrónico",
   },
   {
     accessorKey: "telefono",
     header: "Teléfono",
   },
   {
-    accessorKey: "tipo_cliente.nombre",
+    accessorKey: "nombre_tipo_cliente",
     header: "Tipo",
-    cell: ({ row }) => row.original.tipo_cliente?.nombre || 'N/A',
+    cell: ({ row }) => row.original.nombre_tipo_cliente || 'N/A',
   },
   {
     accessorKey: "estado",
     header: "Estado",
     cell: ({ row }) => {
-      const isActive = row.getValue("estado");
-      return <Badge variant={isActive ? "default" : "secondary"}>{isActive ? "Activo" : "Inactivo"}</Badge>;
+      const status = (row.getValue("estado") as string) || "";
+      const isActive = status.toLowerCase() === "activo";
+      return <Badge variant={isActive ? "default" : "secondary"}>{status}</Badge>;
     },
   },
 ]

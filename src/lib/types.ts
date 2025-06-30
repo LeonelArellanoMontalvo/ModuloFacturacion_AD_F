@@ -5,14 +5,17 @@ export interface TipoCliente {
 }
 
 export interface Cliente {
-  id: number;
+  id_cliente: number;
   id_tipo_cliente: number;
   nombre: string;
   apellido: string;
   direccion: string;
   telefono: string;
-  email: string;
-  estado: boolean;
+  correo_electronico: string;
+  estado: string;
+  tipo_identificacion: string;
+  numero_identificacion: string;
+  nombre_tipo_cliente?: string;
   tipo_cliente?: TipoCliente;
 }
 

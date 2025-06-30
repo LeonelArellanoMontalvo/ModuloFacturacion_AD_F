@@ -138,7 +138,7 @@ export async function createFactura(formData: z.infer<typeof facturaSchema>) {
   }
 
   revalidatePath('/facturas');
-  redirect('/facturas');
+  return { success: "Factura creada exitosamente" };
 }
 
 

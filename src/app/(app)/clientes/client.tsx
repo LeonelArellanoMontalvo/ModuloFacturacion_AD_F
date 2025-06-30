@@ -75,7 +75,7 @@ export function ClientesClient({ data, tipos }: ClientesClientProps) {
 
   const handleSubmit = (values: FormValues) => {
     startTransition(async () => {
-      const action = currentCliente ? updateCliente(currentCliente.id, values) : createCliente(values);
+      const action = currentCliente ? updateCliente(currentCliente.id_cliente, values) : createCliente(values);
       const result = await action;
 
       if (result?.error) {

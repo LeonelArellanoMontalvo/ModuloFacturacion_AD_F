@@ -27,7 +27,7 @@ export default async function FacturasPage() {
 
   const facturasWithClientes = facturas.map(factura => ({
       ...factura,
-      cliente: clientes.find(c => c.id === factura.id_cliente)
+      cliente: clientes.find(c => c.id_cliente === factura.id_cliente)
   }));
 
   return (

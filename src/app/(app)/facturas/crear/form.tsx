@@ -48,7 +48,7 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
   });
 
   const selectedClientId = useWatch({ control: form.control, name: "header.id_cliente" });
-  const selectedCliente = useMemo(() => clientes.find(c => c.id === Number(selectedClientId)), [selectedClientId, clientes]);
+  const selectedCliente = useMemo(() => clientes.find(c => c.id_cliente === Number(selectedClientId)), [selectedClientId, clientes]);
 
   const detalles = useWatch({ control: form.control, name: 'detalles' });
 
@@ -75,6 +75,7 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
           title: "Factura Creada",
           description: "La factura se ha guardado exitosamente.",
         })
+        router.push('/facturas');
       }
     })
   }
@@ -99,7 +100,7 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
                   <FormLabel>Cliente</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Seleccione un cliente" /></SelectTrigger></FormControl>
-                    <SelectContent>{clientes.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.nombre} {c.apellido}</SelectItem>)}</SelectContent>
+                    <SelectContent>{clientes.map(c => <SelectItem key={c.id_cliente} value={String(c.id_cliente)}>{c.nombre} {c.apellido}</SelectItem>)}</SelectContent>
                   </Select>
                   <FormMessage />
                 </FormItem>
@@ -108,7 +109,7 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
             {selectedCliente && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm p-4 border rounded-lg bg-muted">
                 <div><span className="font-semibold">Dirección:</span> {selectedCliente.direccion}</div>
-                <div><span className="font-semibold">Email:</span> {selectedCliente.email}</div>
+                <div><span className="font-semibold">Email:</span> {selectedCliente.correo_electronico}</div>
                 <div><span className="font-semibold">Teléfono:</span> {selectedCliente.telefono}</div>
               </div>
             )}

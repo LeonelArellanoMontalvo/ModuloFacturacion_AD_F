@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -23,7 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 
 export type FormValues = z.infer<typeof clienteSchema>;
 
@@ -40,11 +38,13 @@ export function ClienteForm({ onSubmit, defaultValues, isPending, tipos }: Clien
     defaultValues: {
       nombre: defaultValues?.nombre || "",
       apellido: defaultValues?.apellido || "",
+      tipo_identificacion: defaultValues?.tipo_identificacion || undefined,
+      numero_identificacion: defaultValues?.numero_identificacion || "",
       direccion: defaultValues?.direccion || "",
       telefono: defaultValues?.telefono || "",
-      email: defaultValues?.email || "",
+      correo_electronico: defaultValues?.correo_electronico || "",
       id_tipo_cliente: defaultValues?.id_tipo_cliente || undefined,
-      estado: defaultValues?.estado ?? true,
+      estado: defaultValues?.estado || "Activo",
     },
   });
 
@@ -75,12 +75,49 @@ export function ClienteForm({ onSubmit, defaultValues, isPending, tipos }: Clien
             )}
           />
         </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+             <FormField
+                control={form.control}
+                name="tipo_identificacion"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Tipo de Identificación</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                        <SelectTrigger>
+                        <SelectValue placeholder="Seleccione un tipo" />
+                        </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                        <SelectItem value="Cédula">Cédula</SelectItem>
+                        <SelectItem value="RUC">RUC</SelectItem>
+                        <SelectItem value="Pasaporte">Pasaporte</SelectItem>
+                    </SelectContent>
+                    </Select>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="numero_identificacion"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Número de Identificación</FormLabel>
+                    <FormControl><Input placeholder="1234567890" {...field} /></FormControl>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+        </div>
+        
         <FormField
           control={form.control}
-          name="email"
+          name="correo_electronico"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>Correo Electrónico</FormLabel>
               <FormControl><Input placeholder="john.doe@example.com" {...field} /></FormControl>
               <FormMessage />
             </FormItem>
@@ -134,26 +171,27 @@ export function ClienteForm({ onSubmit, defaultValues, isPending, tipos }: Clien
           )}
         />
         </div>
-        <FormField
+         <FormField
             control={form.control}
             name="estado"
             render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                <div className="space-y-0.5">
+                <FormItem>
                     <FormLabel>Estado</FormLabel>
-                    <FormDescription>
-                    Indica si el cliente está activo o inactivo.
-                    </FormDescription>
-                </div>
-                <FormControl>
-                    <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    />
-                </FormControl>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Seleccione un estado" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            <SelectItem value="Activo">Activo</SelectItem>
+                            <SelectItem value="Inactivo">Inactivo</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
                 </FormItem>
             )}
-            />
+        />
         <Button type="submit" disabled={isPending}>
           {isPending ? "Guardando..." : "Guardar"}
         </Button>
