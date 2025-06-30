@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useTransition } from "react";
+import React, { useState, useMemo, useTransition, useCallback } from "react";
 import Link from "next/link";
 import { Factura, Cliente, DetalleFactura, Producto } from "@/lib/types";
 import { getColumns } from "./columns";
@@ -17,14 +17,14 @@ import {
 import { deleteFactura } from "@/lib/actions";
 import { useToast } from "@/hooks/use-toast";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -51,7 +51,6 @@ interface FacturasClientProps {
 }
 
 export function FacturasClient({ data, clientes }: FacturasClientProps) {
-  const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
 
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -59,26 +58,26 @@ export function FacturasClient({ data, clientes }: FacturasClientProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [facturaToDelete, setFacturaToDelete] = useState<number | null>(null);
   const [selectedFactura, setSelectedFactura] = useState<Factura | null>(null);
-  const [detalles, setDetalles] = useState<DetalleFactura[]>([]);
+  const [detalles, setDetalles] = useState<(DetalleFactura & { producto?: Producto })[]>([]);
   const [isLoadingDetalles, startLoadingDetalles] = useTransition();
 
   const noClientes = clientes.length === 0;
 
-  const handleViewDetails = (factura: Factura) => {
+  const handleViewDetails = useCallback((factura: Factura) => {
     setSelectedFactura(factura);
     setIsDetailsOpen(true);
     startLoadingDetalles(async () => {
         const detallesData = await getDetalles(factura.id);
         setDetalles(detallesData);
     });
-  };
+  }, [startLoadingDetalles]);
 
-  const handleDeleteRequest = (id: number) => {
+  const handleDeleteRequest = useCallback((id: number) => {
     setFacturaToDelete(id);
     setIsDeleteDialogOpen(true);
-  };
+  }, []);
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = useCallback(() => {
     if (facturaToDelete === null) return;
     startDeleting(async () => {
         await deleteFactura(facturaToDelete);
@@ -89,9 +88,9 @@ export function FacturasClient({ data, clientes }: FacturasClientProps) {
         setIsDeleteDialogOpen(false);
         setFacturaToDelete(null);
     });
-  };
+  }, [facturaToDelete, startDeleting, toast]);
   
-  const columns = useMemo(() => getColumns(handleDeleteRequest, handleViewDetails), []);
+  const columns = useMemo(() => getColumns(handleDeleteRequest, handleViewDetails), [handleDeleteRequest, handleViewDetails]);
 
   return (
     <>
@@ -145,7 +144,7 @@ export function FacturasClient({ data, clientes }: FacturasClientProps) {
                     <TableBody>
                         {detalles.map(d => (
                             <TableRow key={d.id}>
-                                <TableCell>{(d as any).producto?.nombre || 'N/A'}</TableCell>
+                                <TableCell>{d.producto?.nombre || 'N/A'}</TableCell>
                                 <TableCell>{d.cantidad}</TableCell>
                                 <TableCell className="text-right">${d.precio_unitario.toFixed(2)}</TableCell>
                                 <TableCell className="text-right">${d.subtotal.toFixed(2)}</TableCell>
