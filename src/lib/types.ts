@@ -20,10 +20,10 @@ export interface Cliente {
 }
 
 export interface Factura {
-  id: number;
+  id_factura: number;
   id_cliente: number;
   numero_factura: string;
-  fecha_emision: string;
+  fecha_factura: string;
   monto_total: number;
   tipo_pago: string;
   estado_factura: string;

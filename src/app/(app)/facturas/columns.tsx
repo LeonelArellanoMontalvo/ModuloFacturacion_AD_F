@@ -38,7 +38,7 @@ export const getColumns = (
             <DropdownMenuItem onClick={() => onViewDetails(factura)}>
               Mostrar Detalles
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onDelete(factura.id)} className="text-destructive">
+            <DropdownMenuItem onClick={() => onDelete(factura.id_factura)} className="text-destructive">
               Eliminar
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -59,11 +59,11 @@ export const getColumns = (
     }
   },
   {
-    accessorKey: "fecha_emision",
-    header: "Fecha de Emisión",
+    accessorKey: "fecha_factura",
+    header: "Fecha de Factura",
     cell: ({ row }) => {
         try {
-            return format(new Date(row.getValue("fecha_emision")), 'dd/MM/yyyy');
+            return format(new Date(row.getValue("fecha_factura")), 'dd/MM/yyyy');
         } catch (error) {
             return "Fecha inválida";
         }
@@ -86,13 +86,14 @@ export const getColumns = (
     accessorKey: "estado_factura",
     header: "Estado",
     cell: ({ row }) => {
-        const status = row.getValue("estado_factura") as string;
+        const status = (row.getValue("estado_factura") as string || "").toLowerCase();
         let variant: "default" | "secondary" | "destructive" | "outline" = "secondary";
-        if (status?.toLowerCase() === 'pagada') variant = 'default';
-        if (status?.toLowerCase() === 'pendiente') variant = 'outline';
-        if (status?.toLowerCase() === 'anulada') variant = 'destructive';
         
-        return <Badge variant={variant}>{status}</Badge>;
+        if (status === 'pagado') variant = 'default';
+        else if (status === 'no pagada' || status === 'pendiente' || status === 'credito') variant = 'outline';
+        else if (status === 'anulada') variant = 'destructive';
+        
+        return <Badge variant={variant} className="capitalize">{row.getValue("estado_factura")}</Badge>;
     }
   },
 ]

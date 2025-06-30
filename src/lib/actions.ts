@@ -116,13 +116,13 @@ export async function createFactura(formData: z.infer<typeof facturaSchema>) {
       body: JSON.stringify({ ...header, monto_total: 0 }),
     });
 
-    if (!newFactura || !newFactura.id) {
+    if (!newFactura || !newFactura.id_factura) {
       throw new Error("No se pudo crear la cabecera de la factura.");
     }
 
     // 2. Create invoice details
     const detallesPayload = {
-      id_factura: newFactura.id,
+      id_factura: newFactura.id_factura,
       productos: detalles,
     };
 

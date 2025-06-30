@@ -67,10 +67,10 @@ export function FacturasClient({ data, clientes }: FacturasClientProps) {
     setSelectedFactura(factura);
     setIsDetailsOpen(true);
     startLoadingDetalles(async () => {
-        const detallesData = await getDetalles(factura.id);
+        const detallesData = await getDetalles(factura.id_factura);
         setDetalles(detallesData);
     });
-  }, [startLoadingDetalles]);
+  }, []);
 
   const handleDeleteRequest = useCallback((id: number) => {
     setFacturaToDelete(id);
@@ -88,7 +88,7 @@ export function FacturasClient({ data, clientes }: FacturasClientProps) {
         setIsDeleteDialogOpen(false);
         setFacturaToDelete(null);
     });
-  }, [facturaToDelete, startDeleting, toast]);
+  }, [facturaToDelete, toast]);
   
   const columns = useMemo(() => getColumns(handleDeleteRequest, handleViewDetails), [handleDeleteRequest, handleViewDetails]);
 
@@ -122,7 +122,7 @@ export function FacturasClient({ data, clientes }: FacturasClientProps) {
             <DialogTitle>Detalles de la Factura {selectedFactura?.numero_factura}</DialogTitle>
             {selectedFactura && (
                  <DialogDescription>
-                    Cliente: {selectedFactura.cliente?.nombre} {selectedFactura.cliente?.apellido} | Fecha: {format(new Date(selectedFactura.fecha_emision), 'dd/MM/yyyy')}
+                    Cliente: {selectedFactura.cliente?.nombre} {selectedFactura.cliente?.apellido} | Fecha: {format(new Date(selectedFactura.fecha_factura), 'dd/MM/yyyy')}
                 </DialogDescription>
             )}
           </DialogHeader>

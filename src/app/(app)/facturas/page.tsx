@@ -12,8 +12,14 @@ async function getData(): Promise<{facturas: Factura[], clientes: Cliente[]}> {
     if (!facturasRes.ok) throw new Error('Failed to fetch facturas');
     if (!clientesRes.ok) throw new Error('Failed to fetch clientes');
     
-    const facturas: Factura[] = await facturasRes.json();
+    const facturasData: any[] = await facturasRes.json();
     const clientes: Cliente[] = await clientesRes.json();
+    
+    // Map id_factura to id and fecha_factura to fecha_emision for compatibility
+    const facturas: Factura[] = facturasData.map(f => ({
+      ...f,
+      monto_total: parseFloat(f.monto_total) // Ensure monto_total is a number
+    }));
 
     return { facturas, clientes };
   } catch (error) {
