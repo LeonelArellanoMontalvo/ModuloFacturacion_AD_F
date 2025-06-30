@@ -60,25 +60,29 @@ export function DataTable<TData, TValue>({
     },
   })
 
+  const filterColumnId = React.useMemo(() => {
+    const filterableIds = ["nombre", "descripcion"];
+    const allColumnIds = new Set(table.getAllColumns().map(c => c.id));
+    return filterableIds.find(id => allColumnIds.has(id));
+  }, [table]);
+
   return (
     <div>
       <div className="flex items-center justify-between py-4">
-        <Input
-          placeholder="Filtrar..."
-          value={(table.getColumn("nombre")?.getFilterValue() as string) ?? (table.getColumn("descripcion")?.getFilterValue() as string) ?? ""}
-          onChange={(event) => {
-            const nameCol = table.getColumn("nombre");
-            if (nameCol) {
-              nameCol.setFilterValue(event.target.value);
+        {filterColumnId ? (
+          <Input
+            placeholder="Filtrar..."
+            value={
+              (table.getColumn(filterColumnId)?.getFilterValue() as string) ?? ""
             }
-            const descCol = table.getColumn("descripcion");
-            if (descCol) {
-              descCol.setFilterValue(event.target.value);
+            onChange={(event) =>
+              table.getColumn(filterColumnId)?.setFilterValue(event.target.value)
             }
-          }
-          }
-          className="max-w-sm"
-        />
+            className="max-w-sm"
+          />
+        ) : (
+          <div className="max-w-sm" />
+        )}
         {toolbar}
       </div>
       <div className="rounded-md border">
