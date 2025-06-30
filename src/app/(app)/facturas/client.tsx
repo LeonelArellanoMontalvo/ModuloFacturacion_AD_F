@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useTransition, useCallback } from "react";
 import Link from "next/link";
-import { Factura, Cliente, DetalleFactura, Producto } from "@/lib/types";
+import { Factura, Cliente, DetalleFactura } from "@/lib/types";
 import { getColumns } from "./columns";
 import { DataTable } from "@/components/data-table";
 import { Button } from "@/components/ui/button";
@@ -30,18 +30,23 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
 
-async function getDetalles(facturaId: number): Promise<(DetalleFactura & { producto: Producto })[]> {
-    const [detallesRes, productosRes] = await Promise.all([
-        fetch(`https://apdis-p5v5.vercel.app/api/detalle_facturas/?id_factura=${facturaId}`, { cache: 'no-store' }),
-        fetch('https://productos-three-orpin.vercel.app/api/productos', { cache: 'no-store' })
-    ]);
-    const detalles = await detallesRes.json();
-    const productos = await productosRes.json();
-    
-    return detalles.map((d: DetalleFactura) => ({
-        ...d,
-        producto: productos.find((p: Producto) => p.id === d.id_producto)
-    }));
+async function getDetalles(facturaId: number): Promise<DetalleFactura[]> {
+    try {
+        const res = await fetch(`https://apdis-p5v5.vercel.app/api/detalle_facturas/?id_factura=${facturaId}`, { cache: 'no-store' });
+        if (!res.ok) {
+            console.error(`Failed to fetch details for factura ${facturaId}`);
+            return [];
+        }
+        const data = await res.json();
+        // The API returns an array with one object which contains the details array.
+        if (Array.isArray(data) && data.length > 0 && data[0].detalles) {
+            return data[0].detalles;
+        }
+        return [];
+    } catch (error) {
+        console.error("Error parsing details response:", error);
+        return [];
+    }
 }
 
 
@@ -58,7 +63,7 @@ export function FacturasClient({ data, clientes }: FacturasClientProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [facturaToDelete, setFacturaToDelete] = useState<number | null>(null);
   const [selectedFactura, setSelectedFactura] = useState<Factura | null>(null);
-  const [detalles, setDetalles] = useState<(DetalleFactura & { producto?: Producto })[]>([]);
+  const [detalles, setDetalles] = useState<DetalleFactura[]>([]);
   const [isLoadingDetalles, startLoadingDetalles] = useTransition();
 
   const noClientes = clientes.length === 0;
@@ -143,11 +148,11 @@ export function FacturasClient({ data, clientes }: FacturasClientProps) {
                     </TableHeader>
                     <TableBody>
                         {detalles.map(d => (
-                            <TableRow key={d.id}>
-                                <TableCell>{d.producto?.nombre || 'N/A'}</TableCell>
+                            <TableRow key={d.id_detalle_factura}>
+                                <TableCell>{d.nombre || 'N/A'}</TableCell>
                                 <TableCell>{d.cantidad}</TableCell>
-                                <TableCell className="text-right">${(d.precio_unitario || 0).toFixed(2)}</TableCell>
-                                <TableCell className="text-right">${(d.subtotal || 0).toFixed(2)}</TableCell>
+                                <TableCell className="text-right">${(parseFloat(d.precio_unitario) || 0).toFixed(2)}</TableCell>
+                                <TableCell className="text-right">${(parseFloat(d.subtotal) || 0).toFixed(2)}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>

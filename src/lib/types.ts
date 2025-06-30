@@ -32,13 +32,13 @@ export interface Factura {
 }
 
 export interface DetalleFactura {
-  id: number;
+  id_detalle_factura: number;
   id_factura: number;
   id_producto: number;
   cantidad: number;
-  precio_unitario: number;
-  subtotal: number;
-  producto?: Producto;
+  precio_unitario: string;
+  subtotal: string;
+  nombre: string;
 }
 
 export interface Producto {
