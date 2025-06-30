@@ -13,7 +13,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { tipoClienteSchema } from "@/lib/actions"
+import { tipoClienteSchema } from "@/lib/schemas"
 import type { TipoCliente } from "@/lib/types"
 
 export type FormValues = z.infer<typeof tipoClienteSchema>;

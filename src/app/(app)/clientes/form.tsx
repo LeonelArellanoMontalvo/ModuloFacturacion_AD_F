@@ -14,7 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { clienteSchema } from "@/lib/actions";
+import { clienteSchema } from "@/lib/schemas";
 import type { Cliente, TipoCliente } from "@/lib/types";
 import {
   Select,
