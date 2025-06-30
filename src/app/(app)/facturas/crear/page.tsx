@@ -7,7 +7,7 @@ async function getData(): Promise<{ clientes: Cliente[], productos: Producto[] }
     try {
         const [clientesRes, productosRes] = await Promise.all([
             fetch('https://apdis-p5v5.vercel.app/api/clientes/', { cache: 'no-store' }),
-            fetch('https://ad-xglt.onrender.com/api/v1/productos', { cache: 'no-store' })
+            fetch('https://productos-three-orpin.vercel.app/api/productos', { cache: 'no-store' })
         ]);
         
         if (!clientesRes.ok) throw new Error('Failed to fetch clientes');
