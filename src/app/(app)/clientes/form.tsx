@@ -115,7 +115,7 @@ export function ClienteForm({ onSubmit, defaultValues, isPending, tipos }: Clien
           render={({ field }) => (
             <FormItem>
               <FormLabel>Tipo de Cliente</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
+              <Select onValueChange={field.onChange} defaultValue={field.value ? String(field.value) : undefined}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccione un tipo" />
@@ -123,8 +123,8 @@ export function ClienteForm({ onSubmit, defaultValues, isPending, tipos }: Clien
                 </FormControl>
                 <SelectContent>
                   {tipos.map((tipo) => (
-                    <SelectItem key={tipo.id} value={String(tipo.id)}>
-                      {tipo.descripcion}
+                    <SelectItem key={tipo.id_tipcli} value={String(tipo.id_tipcli)}>
+                      {tipo.nombre}
                     </SelectItem>
                   ))}
                 </SelectContent>

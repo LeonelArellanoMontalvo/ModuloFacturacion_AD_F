@@ -36,7 +36,7 @@ export const getColumns = (
             <DropdownMenuItem onClick={() => onEdit(tipoCliente)}>
               Editar
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onDelete(tipoCliente.id)} className="text-destructive">
+            <DropdownMenuItem onClick={() => onDelete(tipoCliente.id_tipcli)} className="text-destructive">
               Eliminar
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -45,11 +45,24 @@ export const getColumns = (
     },
   },
   {
-    accessorKey: "id",
+    accessorKey: "id_tipcli",
     header: "ID",
   },
   {
-    accessorKey: "descripcion",
-    header: "Descripción",
+    accessorKey: "nombre",
+    header: "Nombre",
+  },
+  {
+    accessorKey: "monto_maximo",
+    header: "Monto Máximo",
+    cell: ({ row }) => {
+      const amount = parseFloat(row.getValue("monto_maximo"))
+      const formatted = new Intl.NumberFormat("es-EC", {
+        style: "currency",
+        currency: "USD",
+      }).format(amount)
+ 
+      return <div className="text-right font-medium">{formatted}</div>
+    },
   },
 ]

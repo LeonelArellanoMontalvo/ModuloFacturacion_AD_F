@@ -1,7 +1,8 @@
 import { z } from "zod";
 
 export const tipoClienteSchema = z.object({
-  descripcion: z.string().min(3, "La descripción debe tener al menos 3 caracteres."),
+  nombre: z.string().min(3, "El nombre debe tener al menos 3 caracteres."),
+  monto_maximo: z.coerce.number().min(0, "El monto máximo no debe ser negativo."),
 });
 
 export const clienteSchema = z.object({

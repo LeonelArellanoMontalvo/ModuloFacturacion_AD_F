@@ -1,6 +1,7 @@
 export interface TipoCliente {
-  id: number;
-  descripcion: string;
+  id_tipcli: number;
+  nombre: string;
+  monto_maximo: number;
 }
 
 export interface Cliente {

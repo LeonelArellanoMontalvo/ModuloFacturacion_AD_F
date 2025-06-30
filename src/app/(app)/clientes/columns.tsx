@@ -58,9 +58,9 @@ export const getColumns = (
     header: "Teléfono",
   },
   {
-    accessorKey: "tipo_cliente.descripcion",
+    accessorKey: "tipo_cliente.nombre",
     header: "Tipo",
-    cell: ({ row }) => row.original.tipo_cliente?.descripcion || 'N/A',
+    cell: ({ row }) => row.original.tipo_cliente?.nombre || 'N/A',
   },
   {
     accessorKey: "estado",

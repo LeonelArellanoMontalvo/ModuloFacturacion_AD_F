@@ -71,7 +71,7 @@ export function TipoClientesClient({ data }: TipoClientesClientProps) {
 
   const handleSubmit = (values: FormValues) => {
     startTransition(async () => {
-      const action = currentTipo ? updateTipoCliente(currentTipo.id, values) : createTipoCliente(values)
+      const action = currentTipo ? updateTipoCliente(currentTipo.id_tipcli, values) : createTipoCliente(values)
       const result = await action
       
       if (result?.error) {

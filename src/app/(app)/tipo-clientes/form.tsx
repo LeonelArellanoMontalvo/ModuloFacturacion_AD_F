@@ -28,21 +28,35 @@ export function TipoClienteForm({ onSubmit, defaultValues, isPending }: TipoClie
   const form = useForm<FormValues>({
     resolver: zodResolver(tipoClienteSchema),
     defaultValues: {
-      descripcion: defaultValues?.descripcion || "",
+      nombre: defaultValues?.nombre || "",
+      monto_maximo: defaultValues?.monto_maximo || 0,
     },
   });
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
-          name="descripcion"
+          name="nombre"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Descripción</FormLabel>
+              <FormLabel>Nombre</FormLabel>
               <FormControl>
                 <Input placeholder="Ej: Mayorista" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="monto_maximo"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Monto Máximo</FormLabel>
+              <FormControl>
+                <Input type="number" placeholder="1000.00" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
