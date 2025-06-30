@@ -80,7 +80,7 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
     })
   }
 
-  const selectedProductIds = useMemo(() => detalles.map(d => d.id_producto), [detalles]);
+  const selectedProductIds = useMemo(() => detalles.map(d => Number(d.id_producto)), [detalles]);
 
   return (
     <Form {...form}>
@@ -107,10 +107,25 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
               )}
             />
             {selectedCliente && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm p-4 border rounded-lg bg-muted">
-                <div><span className="font-semibold">Dirección:</span> {selectedCliente.direccion}</div>
-                <div><span className="font-semibold">Email:</span> {selectedCliente.correo_electronico}</div>
-                <div><span className="font-semibold">Teléfono:</span> {selectedCliente.telefono}</div>
+               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                <FormItem>
+                  <FormLabel>Dirección</FormLabel>
+                  <FormControl>
+                    <Input value={selectedCliente.direccion || ''} readOnly className="bg-muted" />
+                  </FormControl>
+                </FormItem>
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input value={selectedCliente.correo_electronico || ''} readOnly className="bg-muted" />
+                  </FormControl>
+                </FormItem>
+                <FormItem>
+                  <FormLabel>Teléfono</FormLabel>
+                  <FormControl>
+                    <Input value={selectedCliente.telefono || ''} readOnly className="bg-muted" />
+                  </FormControl>
+                </FormItem>
               </div>
             )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -126,6 +141,7 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
                                     <SelectItem value="Efectivo">Efectivo</SelectItem>
                                     <SelectItem value="Tarjeta de Credito">Tarjeta de Crédito</SelectItem>
                                     <SelectItem value="Transferencia">Transferencia</SelectItem>
+                                    <SelectItem value="Credito">Crédito</SelectItem>
                                 </SelectContent>
                             </Select>
                             <FormMessage />
@@ -144,6 +160,7 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
                                     <SelectItem value="Pagada">Pagada</SelectItem>
                                     <SelectItem value="Pendiente">Pendiente</SelectItem>
                                     <SelectItem value="Anulada">Anulada</SelectItem>
+                                    <SelectItem value="No Pagada">No Pagada</SelectItem>
                                 </SelectContent>
                             </Select>
                             <FormMessage />
