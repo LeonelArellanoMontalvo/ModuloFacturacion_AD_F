@@ -86,11 +86,18 @@ export async function createCliente(formData: z.infer<typeof clienteSchema>) {
     console.error(validatedFields.error.flatten().fieldErrors);
     return { error: "Datos inválidos." };
   }
+
+  const { fecha_nacimiento, ...rest } = validatedFields.data;
+  const payload = {
+    ...rest,
+    fecha_nacimiento: fecha_nacimiento.toISOString().split('T')[0],
+  };
+
   try {
     await apiCall('/clientes/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(validatedFields.data),
+      body: JSON.stringify(payload),
     });
     revalidatePath('/clientes');
     return { success: "Cliente creado." };
@@ -108,11 +115,18 @@ export async function updateCliente(id: number, formData: z.infer<typeof cliente
     if (!validatedFields.success) {
         return { error: "Datos inválidos." };
     }
+
+    const { fecha_nacimiento, ...rest } = validatedFields.data;
+    const payload = {
+      ...rest,
+      fecha_nacimiento: fecha_nacimiento.toISOString().split('T')[0],
+    };
+
     try {
       await apiCall(`/clientes/${id}/`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(validatedFields.data),
+          body: JSON.stringify(payload),
       });
       revalidatePath('/clientes');
       return { success: "Cliente actualizado." };

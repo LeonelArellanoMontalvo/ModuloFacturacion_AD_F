@@ -22,6 +22,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 export type FormValues = z.infer<typeof clienteSchema>;
 
@@ -40,10 +45,11 @@ export function ClienteForm({ onSubmit, defaultValues, isPending, tipos }: Clien
       apellido: defaultValues?.apellido || "",
       tipo_identificacion: defaultValues?.tipo_identificacion || undefined,
       numero_identificacion: defaultValues?.numero_identificacion || "",
+      fecha_nacimiento: defaultValues?.fecha_nacimiento ? new Date(defaultValues.fecha_nacimiento + 'T00:00:00') : undefined,
       direccion: defaultValues?.direccion || "",
       telefono: defaultValues?.telefono || "",
       correo_electronico: defaultValues?.correo_electronico || "",
-      id_tipo_cliente: defaultValues?.id_tipo_cliente || undefined,
+      tipo_cliente: defaultValues?.tipo_cliente || undefined,
       estado: defaultValues?.estado || "Activo",
     },
   });
@@ -114,6 +120,48 @@ export function ClienteForm({ onSubmit, defaultValues, isPending, tipos }: Clien
         
         <FormField
           control={form.control}
+          name="fecha_nacimiento"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Fecha de Nacimiento</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full pl-3 text-left font-normal",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value ? (
+                        format(field.value, "PPP")
+                      ) : (
+                        <span>Seleccione una fecha</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value}
+                    onSelect={field.onChange}
+                    disabled={(date) =>
+                      date > new Date() || date < new Date("1900-01-01")
+                    }
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
           name="correo_electronico"
           render={({ field }) => (
             <FormItem>
@@ -148,7 +196,7 @@ export function ClienteForm({ onSubmit, defaultValues, isPending, tipos }: Clien
         />
         <FormField
           control={form.control}
-          name="id_tipo_cliente"
+          name="tipo_cliente"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Tipo de Cliente</FormLabel>

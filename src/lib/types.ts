@@ -6,7 +6,7 @@ export interface TipoCliente {
 
 export interface Cliente {
   id_cliente: number;
-  id_tipo_cliente: number;
+  tipo_cliente: number;
   nombre: string;
   apellido: string;
   direccion: string;
@@ -15,8 +15,8 @@ export interface Cliente {
   estado: string;
   tipo_identificacion: string;
   numero_identificacion: string;
+  fecha_nacimiento: string;
   nombre_tipo_cliente?: string;
-  tipo_cliente?: TipoCliente;
 }
 
 export interface Factura {
