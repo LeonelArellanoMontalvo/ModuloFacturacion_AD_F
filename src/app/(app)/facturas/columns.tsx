@@ -13,8 +13,6 @@ import {
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { MoreHorizontal } from "lucide-react"
-import { format } from 'date-fns';
-
 
 export const getColumns = (
   onDelete: (id: number) => void,
@@ -63,7 +61,21 @@ export const getColumns = (
     header: "Fecha de Factura",
     cell: ({ row }) => {
         try {
-            return format(new Date(row.getValue("fecha_factura")), 'dd/MM/yyyy');
+            const dateString = row.getValue("fecha_factura") as string;
+            // The date comes in ISO format (e.g., "2025-06-19T01:41:20.106Z").
+            // Using `new Date()` can cause hydration errors due to timezone differences
+            // between server and client. We'll format it manually by splitting the string.
+            if (!dateString || !dateString.includes('T')) {
+              return "Fecha inválida";
+            }
+            const datePart = dateString.split('T')[0];
+            const [year, month, day] = datePart.split('-');
+            
+            if (!year || !month || !day) {
+              return "Fecha inválida";
+            }
+
+            return `${day}/${month}/${year}`;
         } catch (error) {
             return "Fecha inválida";
         }
