@@ -34,13 +34,21 @@ export async function createTipoCliente(formData: z.infer<typeof tipoClienteSche
   if (!validatedFields.success) {
     return { error: "Datos inválidos." };
   }
-  await apiCall('/tipo_clientes/', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(validatedFields.data),
-  });
-  revalidatePath('/tipo-clientes');
-  return { success: "Tipo de cliente creado." };
+  try {
+    await apiCall('/tipo_clientes/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(validatedFields.data),
+    });
+    revalidatePath('/tipo-clientes');
+    return { success: "Tipo de cliente creado." };
+  } catch (error: any) {
+    const message = error.message as string;
+    if (message?.includes("already exists")) {
+      return { error: "Un tipo de cliente con este nombre ya existe." };
+    }
+    return { error: "No se pudo crear el tipo de cliente." };
+  }
 }
 
 export async function updateTipoCliente(id: number, formData: z.infer<typeof tipoClienteSchema>) {
@@ -48,13 +56,21 @@ export async function updateTipoCliente(id: number, formData: z.infer<typeof tip
   if (!validatedFields.success) {
     return { error: "Datos inválidos." };
   }
-  await apiCall(`/tipo_clientes/${id}/`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(validatedFields.data),
-  });
-  revalidatePath('/tipo-clientes');
-  return { success: "Tipo de cliente actualizado." };
+  try {
+    await apiCall(`/tipo_clientes/${id}/`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(validatedFields.data),
+    });
+    revalidatePath('/tipo-clientes');
+    return { success: "Tipo de cliente actualizado." };
+  } catch (error: any) {
+    const message = error.message as string;
+    if (message?.includes("already exists")) {
+      return { error: "Un tipo de cliente con este nombre ya existe." };
+    }
+    return { error: "No se pudo actualizar el tipo de cliente." };
+  }
 }
 
 export async function deleteTipoCliente(id: number) {
@@ -70,13 +86,21 @@ export async function createCliente(formData: z.infer<typeof clienteSchema>) {
     console.error(validatedFields.error.flatten().fieldErrors);
     return { error: "Datos inválidos." };
   }
-  await apiCall('/clientes/', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(validatedFields.data),
-  });
-  revalidatePath('/clientes');
-  return { success: "Cliente creado." };
+  try {
+    await apiCall('/clientes/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(validatedFields.data),
+    });
+    revalidatePath('/clientes');
+    return { success: "Cliente creado." };
+  } catch (error: any) {
+    const message = error.message as string;
+    if (message?.includes("already exists")) {
+      return { error: "Un cliente con este número de identificación ya existe." };
+    }
+    return { error: "No se pudo crear el cliente." };
+  }
 }
 
 export async function updateCliente(id: number, formData: z.infer<typeof clienteSchema>) {
@@ -84,13 +108,21 @@ export async function updateCliente(id: number, formData: z.infer<typeof cliente
     if (!validatedFields.success) {
         return { error: "Datos inválidos." };
     }
-    await apiCall(`/clientes/${id}/`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(validatedFields.data),
-    });
-    revalidatePath('/clientes');
-    return { success: "Cliente actualizado." };
+    try {
+      await apiCall(`/clientes/${id}/`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(validatedFields.data),
+      });
+      revalidatePath('/clientes');
+      return { success: "Cliente actualizado." };
+    } catch (error: any) {
+      const message = error.message as string;
+      if (message?.includes("already exists")) {
+        return { error: "Un cliente con este número de identificación ya existe." };
+      }
+      return { error: "No se pudo actualizar el cliente." };
+    }
 }
 
 export async function deleteCliente(id: number) {
