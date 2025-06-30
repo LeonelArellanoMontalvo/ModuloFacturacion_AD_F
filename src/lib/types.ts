@@ -42,10 +42,10 @@ export interface DetalleFactura {
 }
 
 export interface Producto {
-  id: number;
+  id_producto: number;
   nombre: string;
   descripcion: string;
-  precio: number;
-  stock: number;
-  estado: boolean;
+  precio: number; // Parsed from pvp for calculations
+  pvp: string;
+  estado: string;
 }

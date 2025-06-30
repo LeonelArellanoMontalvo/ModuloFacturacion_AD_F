@@ -54,7 +54,7 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
 
   const totalFactura = useMemo(() => {
     return detalles.reduce((acc, detalle) => {
-        const producto = productos.find(p => p.id === Number(detalle.id_producto));
+        const producto = productos.find(p => p.id_producto === Number(detalle.id_producto));
         const cantidad = Number(detalle.cantidad) || 0;
         const precio = producto?.precio || 0;
         return acc + (cantidad * precio);
@@ -165,7 +165,7 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
             <CardContent className="space-y-4">
                 {fields.map((field, index) => {
                     const selectedProductoId = detalles[index]?.id_producto;
-                    const producto = productos.find(p => p.id === Number(selectedProductoId));
+                    const producto = productos.find(p => p.id_producto === Number(selectedProductoId));
                     const subtotal = (producto?.precio || 0) * (detalles[index]?.cantidad || 0);
 
                     return (
@@ -180,7 +180,7 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
                                             <FormControl><SelectTrigger><SelectValue placeholder="Seleccione un producto" /></SelectTrigger></FormControl>
                                             <SelectContent>
                                                 {productos.map(p => (
-                                                    <SelectItem key={p.id} value={String(p.id)} disabled={selectedProductIds.includes(p.id) && p.id !== Number(field.value)}>
+                                                    <SelectItem key={p.id_producto} value={String(p.id_producto)} disabled={selectedProductIds.includes(p.id_producto) && p.id_producto !== Number(field.value)}>
                                                         {p.nombre}
                                                     </SelectItem>
                                                 ))}

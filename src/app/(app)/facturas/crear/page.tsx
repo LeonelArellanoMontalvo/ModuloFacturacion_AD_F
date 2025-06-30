@@ -14,7 +14,15 @@ async function getData(): Promise<{ clientes: Cliente[], productos: Producto[] }
         if (!productosRes.ok) throw new Error('Failed to fetch productos');
         
         const clientes: Cliente[] = await clientesRes.json();
-        const productos: Producto[] = await productosRes.json();
+        const productosData: any[] = await productosRes.json();
+
+        // Transform products to match the internal Producto interface
+        const productos: Producto[] = productosData.map((p: any) => ({
+            ...p,
+            id_producto: p.id,
+            pvp: p.precio.toString(),
+            precio: parseFloat(p.precio) // Convert pvp string to a number for calculations
+        }));
         
         return { clientes, productos };
     } catch (error) {
