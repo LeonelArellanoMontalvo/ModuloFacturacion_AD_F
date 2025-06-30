@@ -146,8 +146,8 @@ export function FacturasClient({ data, clientes }: FacturasClientProps) {
                             <TableRow key={d.id}>
                                 <TableCell>{d.producto?.nombre || 'N/A'}</TableCell>
                                 <TableCell>{d.cantidad}</TableCell>
-                                <TableCell className="text-right">${d.precio_unitario.toFixed(2)}</TableCell>
-                                <TableCell className="text-right">${d.subtotal.toFixed(2)}</TableCell>
+                                <TableCell className="text-right">${(d.precio_unitario || 0).toFixed(2)}</TableCell>
+                                <TableCell className="text-right">${(d.subtotal || 0).toFixed(2)}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
