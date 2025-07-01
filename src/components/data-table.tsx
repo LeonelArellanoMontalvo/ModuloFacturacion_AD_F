@@ -35,15 +35,23 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   toolbar?: React.ReactNode
+  filterKey?: string
+  filterOptions?: { label: string; value: string }[]
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   toolbar,
+  filterKey,
+  filterOptions,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  
+  const [activeFilterKey, setActiveFilterKey] = React.useState<string>(
+    filterOptions?.[0]?.value ?? filterKey ?? ''
+  );
   
   const table = useReactTable({
     data,
@@ -60,29 +68,42 @@ export function DataTable<TData, TValue>({
     },
   })
 
-  const filterColumnId = React.useMemo(() => {
-    const filterableIds = ["nombre", "descripcion"];
-    const allColumnIds = new Set(table.getAllColumns().map(c => c.id));
-    return filterableIds.find(id => allColumnIds.has(id));
-  }, [table]);
+  const handleFilterKeyChange = (value: string) => {
+    table.getColumn(activeFilterKey)?.setFilterValue(''); // Clear previous filter
+    setActiveFilterKey(value);
+  }
+
+  const activeFilterLabel = filterOptions?.find(o => o.value === activeFilterKey)?.label ?? 'valor';
 
   return (
     <div>
       <div className="flex items-center justify-between py-4">
-        {filterColumnId ? (
-          <Input
-            placeholder="Filtrar..."
-            value={
-              (table.getColumn(filterColumnId)?.getFilterValue() as string) ?? ""
-            }
-            onChange={(event) =>
-              table.getColumn(filterColumnId)?.setFilterValue(event.target.value)
-            }
-            className="max-w-sm"
-          />
-        ) : (
-          <div className="max-w-sm" />
-        )}
+        <div className="flex items-center gap-2">
+            {filterOptions && (
+                 <Select value={activeFilterKey} onValueChange={handleFilterKeyChange}>
+                    <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Filtrar por..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {filterOptions.map(option => (
+                            <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            )}
+            {(filterKey || filterOptions) && activeFilterKey ? (
+                 <Input
+                    placeholder={`Filtrar por ${activeFilterLabel.toLowerCase()}...`}
+                    value={(table.getColumn(activeFilterKey)?.getFilterValue() as string) ?? ""}
+                    onChange={(event) =>
+                        table.getColumn(activeFilterKey)?.setFilterValue(event.target.value)
+                    }
+                    className="max-w-sm"
+                />
+            ) : null }
+        </div>
         {toolbar}
       </div>
       <div className="rounded-md border">

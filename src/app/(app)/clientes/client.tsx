@@ -104,6 +104,11 @@ export function ClientesClient({ data, tipos }: ClientesClientProps) {
   };
 
   const columns = useMemo(() => getColumns(handleEdit, handleDeleteRequest), []);
+  const filterOptions = [
+    { value: "nombre_completo", label: "Nombre" },
+    { value: "numero_identificacion", label: "Identificación" },
+    { value: "nombre_tipo_cliente", label: "Tipo" },
+  ];
 
   return (
     <>
@@ -119,6 +124,7 @@ export function ClientesClient({ data, tipos }: ClientesClientProps) {
       <DataTable
         columns={columns}
         data={data}
+        filterOptions={filterOptions}
         toolbar={
           <Button onClick={handleCreate} disabled={noTipos}>
             <PlusCircle className="mr-2 h-4 w-4" />

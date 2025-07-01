@@ -45,11 +45,12 @@ export const getColumns = (
     },
   },
   {
-    accessorKey: "nombre",
+    id: "nombre_completo",
+    accessorFn: row => `${row.nombre} ${row.apellido}`,
     header: "Nombre",
-    cell: ({ row }) => `${row.original.nombre} ${row.original.apellido}`,
   },
   {
+    accessorKey: "numero_identificacion",
     header: "Identificación",
     cell: ({ row }) => `${row.original.tipo_identificacion}: ${row.original.numero_identificacion}`,
   },

@@ -106,6 +106,7 @@ export function TipoClientesClient({ data }: TipoClientesClientProps) {
       <DataTable
         columns={columns}
         data={data}
+        filterKey="nombre"
         toolbar={
           <Button onClick={handleCreate}>
             <PlusCircle className="mr-2 h-4 w-4" />
