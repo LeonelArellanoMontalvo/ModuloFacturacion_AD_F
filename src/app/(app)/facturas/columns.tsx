@@ -49,6 +49,10 @@ export const getColumns = (
     header: "N° Factura",
   },
   {
+    accessorKey: "id_factura",
+    header: "ID",
+  },
+  {
     accessorKey: "cliente",
     header: "Cliente",
     cell: ({ row }) => {
