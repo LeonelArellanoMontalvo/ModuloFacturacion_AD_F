@@ -90,11 +90,19 @@ export function FacturasClient({ data, clientes }: FacturasClientProps) {
   const handleDeleteConfirm = useCallback(() => {
     if (facturaToDelete === null) return;
     startDeleting(async () => {
-        await deleteFactura(facturaToDelete);
-        toast({
-            title: "Factura eliminada",
-            description: "La factura ha sido eliminada exitosamente.",
-        });
+        const result = await deleteFactura(facturaToDelete);
+        if (result?.error) {
+          toast({
+            title: "Error al eliminar",
+            description: result.error,
+            variant: "destructive",
+          });
+        } else {
+          toast({
+              title: "Factura eliminada",
+              description: "La factura ha sido eliminada exitosamente.",
+          });
+        }
         setIsDeleteDialogOpen(false);
         setFacturaToDelete(null);
     });

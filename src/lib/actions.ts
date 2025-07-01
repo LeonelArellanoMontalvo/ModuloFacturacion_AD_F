@@ -74,8 +74,13 @@ export async function updateTipoCliente(id: number, formData: z.infer<typeof tip
 }
 
 export async function deleteTipoCliente(id: number) {
-  await apiCall(`/tipo_clientes/${id}/`, { method: 'DELETE' });
-  revalidatePath('/tipo-clientes');
+  try {
+    await apiCall(`/tipo_clientes/${id}/`, { method: 'DELETE' });
+    revalidatePath('/tipo-clientes');
+    return { success: true };
+  } catch (error) {
+    return { error: "No se pudo eliminar el tipo de cliente. Es posible que esté en uso." };
+  }
 }
 
 
@@ -140,8 +145,13 @@ export async function updateCliente(id: number, formData: z.infer<typeof cliente
 }
 
 export async function deleteCliente(id: number) {
-  await apiCall(`/clientes/${id}/`, { method: 'DELETE' });
-  revalidatePath('/clientes');
+  try {
+    await apiCall(`/clientes/${id}/`, { method: 'DELETE' });
+    revalidatePath('/clientes');
+    return { success: true };
+  } catch (error) {
+    return { error: "No se pudo eliminar el cliente. Es posible que tenga facturas asociadas." };
+  }
 }
 
 // Factura Actions
@@ -189,6 +199,11 @@ export async function createFactura(formData: z.infer<typeof facturaSchema>) {
 
 
 export async function deleteFactura(id: number) {
-  await apiCall(`/facturas/${id}/`, { method: 'DELETE' });
-  revalidatePath('/facturas');
+  try {
+    await apiCall(`/facturas/${id}/`, { method: 'DELETE' });
+    revalidatePath('/facturas');
+    return { success: true };
+  } catch (error) {
+    return { error: "No se pudo eliminar la factura." };
+  }
 }

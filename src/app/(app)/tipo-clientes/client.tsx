@@ -59,11 +59,19 @@ export function TipoClientesClient({ data }: TipoClientesClientProps) {
   const handleDeleteConfirm = () => {
     if (tipoToDelete === null) return;
     startTransition(async () => {
-        await deleteTipoCliente(tipoToDelete);
-        toast({
-            title: "Tipo de cliente eliminado",
-            description: "El tipo de cliente ha sido eliminado exitosamente.",
-        });
+        const result = await deleteTipoCliente(tipoToDelete);
+        if (result?.error) {
+            toast({
+                title: "Error al eliminar",
+                description: result.error,
+                variant: "destructive",
+            });
+        } else {
+            toast({
+                title: "Tipo de cliente eliminado",
+                description: "El tipo de cliente ha sido eliminado exitosamente.",
+            });
+        }
         setIsDeleteDialogOpen(false);
         setTipoToDelete(null);
     });

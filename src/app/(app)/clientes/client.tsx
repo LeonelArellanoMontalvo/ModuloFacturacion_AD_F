@@ -63,11 +63,19 @@ export function ClientesClient({ data, tipos }: ClientesClientProps) {
   const handleDeleteConfirm = () => {
     if (clienteToDelete === null) return;
     startTransition(async () => {
-        await deleteCliente(clienteToDelete);
-        toast({
-            title: "Cliente eliminado",
-            description: "El cliente ha sido eliminado exitosamente.",
-        });
+        const result = await deleteCliente(clienteToDelete);
+        if (result?.error) {
+            toast({
+                title: "Error al eliminar",
+                description: result.error,
+                variant: "destructive",
+            });
+        } else {
+            toast({
+                title: "Cliente eliminado",
+                description: "El cliente ha sido eliminado exitosamente.",
+            });
+        }
         setIsDeleteDialogOpen(false);
         setClienteToDelete(null);
     });
