@@ -15,7 +15,7 @@ async function getData(): Promise<TipoCliente[]> {
     const tipos: TipoCliente[] = await tiposRes.json();
     const clientes: Cliente[] = await clientesRes.json();
 
-    const usedTipoIds = new Set(clientes.map(c => c.tipo_cliente));
+    const usedTipoIds = new Set(clientes.map(c => Number(c.tipo_cliente)));
 
     const tiposWithStatus = tipos.map(tipo => ({
         ...tipo,
