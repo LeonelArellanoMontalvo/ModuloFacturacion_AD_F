@@ -18,8 +18,9 @@ async function getData(): Promise<TipoCliente[]> {
     const usedTipoIds = new Set(
       clientes
         .map(c => c.tipo_cliente)
-        .filter(id => id != null)
-        .map(id => Number(id))
+        .filter(id => id != null) // Filter out null and undefined
+        .map(id => Number(id))    // Coerce to number
+        .filter(id => !isNaN(id) && id > 0) // Ensure it's a valid, positive ID
     );
 
     const tiposWithStatus = tipos.map(tipo => ({
