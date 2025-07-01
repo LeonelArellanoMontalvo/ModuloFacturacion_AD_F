@@ -45,7 +45,6 @@ export interface Producto {
   id_producto: number;
   nombre: string;
   descripcion: string;
-  precio: number; // Parsed from pvp for calculations
-  pvp: string;
-  estado: string;
+  precio: number;
+  stock_disponible: number;
 }
