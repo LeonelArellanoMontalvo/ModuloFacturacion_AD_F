@@ -218,6 +218,10 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
                                     </FormItem>
                                 )}
                             />
+                            <FormItem className="w-full md:w-24">
+                                <FormLabel>Stock Disp.</FormLabel>
+                                <Input value={producto?.stock_disponible ?? 'N/A'} readOnly className="bg-muted"/>
+                            </FormItem>
                             <FormItem className="w-full md:w-32">
                                 <FormLabel>Precio Unit.</FormLabel>
                                 <Input value={`$${(producto?.precio || 0).toFixed(2)}`} readOnly className="bg-muted"/>
