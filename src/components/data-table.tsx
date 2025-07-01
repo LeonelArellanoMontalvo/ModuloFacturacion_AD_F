@@ -150,34 +150,7 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-       <div className="flex items-center justify-end space-x-2 py-4">
-         <div className="flex-1 text-sm text-muted-foreground">
-            {table.getFilteredRowModel().rows.length} fila(s).
-        </div>
-        <div className="flex items-center space-x-2">
-            <p className="text-sm font-medium">Filas por página</p>
-            <Select
-            value={`${table.getState().pagination.pageSize}`}
-            onValueChange={(value) => {
-                table.setPageSize(Number(value))
-            }}
-            >
-            <SelectTrigger className="h-8 w-[70px]">
-                <SelectValue placeholder={table.getState().pagination.pageSize} />
-            </SelectTrigger>
-            <SelectContent side="top">
-                {[10, 20, 30, 40, 50].map((pageSize) => (
-                <SelectItem key={pageSize} value={`${pageSize}`}>
-                    {pageSize}
-                </SelectItem>
-                ))}
-            </SelectContent>
-            </Select>
-        </div>
-        <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-            Página {table.getState().pagination.pageIndex + 1} de{" "}
-            {table.getPageCount()}
-        </div>
+       <div className="flex items-center justify-between py-4">
         <div className="flex items-center space-x-2">
             <Button
             variant="outline"
@@ -197,6 +170,10 @@ export function DataTable<TData, TValue>({
             <span className="sr-only">Ir a la página anterior</span>
             <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m15 17l-5-5l5-5"/></svg>
             </Button>
+            <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+                Página {table.getState().pagination.pageIndex + 1} de{" "}
+                {table.getPageCount()}
+            </div>
             <Button
             variant="outline"
             className="h-8 w-8 p-0"
@@ -215,6 +192,26 @@ export function DataTable<TData, TValue>({
             <span className="sr-only">Ir a la última página</span>
             <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m13 17l5-5l-5-5M6 17l5-5l-5-5"/></svg>
             </Button>
+            <Select
+            value={`${table.getState().pagination.pageSize}`}
+            onValueChange={(value) => {
+                table.setPageSize(Number(value))
+            }}
+            >
+            <SelectTrigger className="h-8 w-[120px]">
+                <SelectValue placeholder={`${table.getState().pagination.pageSize} por página`} />
+            </SelectTrigger>
+            <SelectContent side="top">
+                {[10, 20, 30, 40, 50].map((pageSize) => (
+                <SelectItem key={pageSize} value={`${pageSize}`}>
+                    {pageSize} por página
+                </SelectItem>
+                ))}
+            </SelectContent>
+            </Select>
+        </div>
+        <div className="text-sm text-muted-foreground">
+            {table.getFilteredRowModel().rows.length} fila(s).
         </div>
       </div>
     </div>

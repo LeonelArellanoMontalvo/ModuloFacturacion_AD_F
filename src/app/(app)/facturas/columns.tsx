@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { MoreHorizontal } from "lucide-react"
+import { MoreHorizontal, ArrowUpDown } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 export const getColumns = (
@@ -70,11 +70,31 @@ export const getColumns = (
   },
   {
     accessorKey: "numero_factura",
-    header: "N° Factura",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          N° Factura
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
   },
   {
     accessorKey: "id_factura",
-    header: "ID",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          ID
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
   },
   {
     id: "cliente_nombre",
@@ -82,7 +102,17 @@ export const getColumns = (
       const cliente = row.cliente;
       return cliente ? `${cliente.nombre} ${cliente.apellido}` : "";
     },
-    header: "Cliente",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Cliente
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
     cell: ({ row }) => {
       const cliente = row.original.cliente;
       return cliente ? `${cliente.nombre} ${cliente.apellido}` : 'N/A';
@@ -90,7 +120,17 @@ export const getColumns = (
   },
   {
     accessorKey: "fecha_factura",
-    header: "Fecha de Factura",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Fecha de Factura
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
     cell: ({ row }) => {
         try {
             const dateString = row.getValue("fecha_factura") as string;
@@ -115,7 +155,19 @@ export const getColumns = (
   },
   {
     accessorKey: "monto_total",
-    header: "Monto Total",
+    header: ({ column }) => {
+        return (
+          <div className="text-right">
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+              Monto Total
+              <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        )
+    },
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("monto_total"))
       const formatted = new Intl.NumberFormat("en-US", {
@@ -128,12 +180,22 @@ export const getColumns = (
   },
   {
     accessorKey: "estado_factura",
-    header: "Estado",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Estado
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
     cell: ({ row }) => {
         const status = (row.getValue("estado_factura") as string || "").toLowerCase();
         let variant: "default" | "secondary" | "destructive" | "outline" = "secondary";
         
-        if (status === 'pagado') variant = 'default';
+        if (status === 'pagada') variant = 'default';
         else if (status === 'no pagada' || status === 'pendiente' || status === 'credito') variant = 'outline';
         else if (status === 'anulada') variant = 'destructive';
         

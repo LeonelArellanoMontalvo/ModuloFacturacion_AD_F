@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useMemo, useTransition } from "react"
+import React, { useMemo, useTransition, useState } from "react"
 import { useForm, useFieldArray, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -17,6 +17,7 @@ import { facturaSchema } from "@/lib/schemas"
 import type { Cliente, Producto } from "@/lib/types"
 import { useToast } from "@/hooks/use-toast"
 import { Trash2, Plus } from "lucide-react"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 
 type FormValues = z.infer<typeof facturaSchema>;
 
@@ -27,6 +28,7 @@ interface CrearFacturaFormProps {
 
 export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps) {
   const [isPending, startTransition] = useTransition()
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const router = useRouter()
   const { toast } = useToast()
 
@@ -103,188 +105,210 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
   const selectedProductIds = useMemo(() => detalles.map(d => Number(d.id_producto)), [detalles]);
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        {/* Invoice Header */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Datos de la Factura</CardTitle>
-            <CardDescription>Seleccione un cliente y complete los datos de la cabecera.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <FormField
-              control={form.control}
-              name="header.id_cliente"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Cliente</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
-                    <FormControl><SelectTrigger><SelectValue placeholder="Seleccione un cliente" /></SelectTrigger></FormControl>
-                    <SelectContent>{clientes.map(c => <SelectItem key={c.id_cliente} value={String(c.id_cliente)}>{c.nombre} {c.apellido}</SelectItem>)}</SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {selectedCliente && (
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                <FormItem>
-                  <FormLabel>Tipo Identificación</FormLabel>
-                  <FormControl>
-                    <Input value={selectedCliente.tipo_identificacion || ''} readOnly className="bg-muted" />
-                  </FormControl>
-                </FormItem>
-                <FormItem>
-                  <FormLabel>N° Identificación</FormLabel>
-                  <FormControl>
-                    <Input value={selectedCliente.numero_identificacion || ''} readOnly className="bg-muted" />
-                  </FormControl>
-                </FormItem>
-                <FormItem>
-                  <FormLabel>Dirección</FormLabel>
-                  <FormControl>
-                    <Input value={selectedCliente.direccion || ''} readOnly className="bg-muted" />
-                  </FormControl>
-                </FormItem>
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input value={selectedCliente.correo_electronico || ''} readOnly className="bg-muted" />
-                  </FormControl>
-                </FormItem>
-                <FormItem>
-                  <FormLabel>Teléfono</FormLabel>
-                  <FormControl>
-                    <Input value={selectedCliente.telefono || ''} readOnly className="bg-muted" />
-                  </FormControl>
-                </FormItem>
-              </div>
-            )}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                    control={form.control}
-                    name="header.tipo_pago"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Tipo de Pago</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl><SelectTrigger><SelectValue placeholder="Seleccione un tipo" /></SelectTrigger></FormControl>
-                                <SelectContent>
-                                    <SelectItem value="Efectivo">Efectivo</SelectItem>
-                                    <SelectItem value="Tarjeta de Credito">Tarjeta de Crédito</SelectItem>
-                                    <SelectItem value="Transferencia">Transferencia</SelectItem>
-                                    <SelectItem value="Credito">Crédito</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                 <FormField
-                    control={form.control}
-                    name="header.estado_factura"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Estado de la Factura</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl><SelectTrigger><SelectValue placeholder="Seleccione un estado" /></SelectTrigger></FormControl>
-                                <SelectContent>
-                                    <SelectItem value="Pagada">Pagada</SelectItem>
-                                    <SelectItem value="Pendiente">Pendiente</SelectItem>
-                                    <SelectItem value="Anulada">Anulada</SelectItem>
-                                    <SelectItem value="No Pagada">No Pagada</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-            </div>
-          </CardContent>
-        </Card>
+    <>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <div className="flex justify-end gap-4">
+              <Button type="button" variant="outline" onClick={() => setIsCancelDialogOpen(true)} disabled={isPending}>
+                  Cancelar
+              </Button>
+              <Button type="submit" disabled={isPending}>
+                {isPending ? "Guardando Factura..." : "Guardar Factura"}
+              </Button>
+          </div>
 
-        <Separator />
-
-        {/* Invoice Details */}
-        <Card>
+          {/* Invoice Header */}
+          <Card>
             <CardHeader>
-                <CardTitle>Detalles de la Factura</CardTitle>
-                <CardDescription>Agregue los productos a la factura.</CardDescription>
+              <CardTitle>Datos de la Factura</CardTitle>
+              <CardDescription>Seleccione un cliente y complete los datos de la cabecera.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-                {fields.map((field, index) => {
-                    const selectedProductoId = detalles[index]?.id_producto;
-                    const producto = productos.find(p => p.id_producto === Number(selectedProductoId));
-                    const subtotal = (producto?.precio || 0) * (detalles[index]?.cantidad || 0);
-
-                    return (
-                        <div key={field.id} className="flex flex-wrap md:flex-nowrap items-start gap-4 p-4 border rounded-lg relative">
-                             <FormField
-                                control={form.control}
-                                name={`detalles.${index}.id_producto`}
-                                render={({ field }) => (
-                                    <FormItem className="flex-1 min-w-[200px]">
-                                        <FormLabel>Producto</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
-                                            <FormControl><SelectTrigger><SelectValue placeholder="Seleccione un producto" /></SelectTrigger></FormControl>
-                                            <SelectContent>
-                                                {productos.map(p => (
-                                                    <SelectItem key={p.id_producto} value={String(p.id_producto)} disabled={selectedProductIds.includes(p.id_producto) && p.id_producto !== Number(field.value)}>
-                                                        {p.nombre}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name={`detalles.${index}.cantidad`}
-                                render={({ field }) => (
-                                    <FormItem className="w-full md:w-24">
-                                        <FormLabel>Cantidad</FormLabel>
-                                        <FormControl><Input type="number" min="1" {...field} /></FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormItem className="w-full md:w-24">
-                                <FormLabel>Stock Disp.</FormLabel>
-                                <Input value={producto?.stock_disponible ?? 'N/A'} readOnly className="bg-muted"/>
-                            </FormItem>
-                            <FormItem className="w-full md:w-32">
-                                <FormLabel>Precio Unit.</FormLabel>
-                                <Input value={`$${(producto?.precio || 0).toFixed(2)}`} readOnly className="bg-muted"/>
-                            </FormItem>
-                             <FormItem className="w-full md:w-32">
-                                <FormLabel>Subtotal</FormLabel>
-                                <Input value={`$${subtotal.toFixed(2)}`} readOnly className="bg-muted" />
-                            </FormItem>
-                            <Button type="button" variant="ghost" size="icon" className="text-destructive absolute top-1 right-1" onClick={() => remove(index)} disabled={fields.length <= 1}>
-                                <Trash2 className="h-4 w-4"/>
-                            </Button>
-                        </div>
-                    )
-                })}
-
-                <Button type="button" variant="outline" size="sm" onClick={() => append({ id_producto: undefined, cantidad: 1 })}>
-                    <Plus className="mr-2 h-4 w-4" /> Agregar Detalle
-                </Button>
+              <FormField
+                control={form.control}
+                name="header.id_cliente"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cliente</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
+                      <FormControl><SelectTrigger><SelectValue placeholder="Seleccione un cliente" /></SelectTrigger></FormControl>
+                      <SelectContent>{clientes.map(c => <SelectItem key={c.id_cliente} value={String(c.id_cliente)}>{c.nombre} {c.apellido}</SelectItem>)}</SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {selectedCliente && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  <FormItem>
+                    <FormLabel>Tipo Identificación</FormLabel>
+                    <FormControl>
+                      <Input value={selectedCliente.tipo_identificacion || ''} readOnly className="bg-muted" />
+                    </FormControl>
+                  </FormItem>
+                  <FormItem>
+                    <FormLabel>N° Identificación</FormLabel>
+                    <FormControl>
+                      <Input value={selectedCliente.numero_identificacion || ''} readOnly className="bg-muted" />
+                    </FormControl>
+                  </FormItem>
+                  <FormItem>
+                    <FormLabel>Dirección</FormLabel>
+                    <FormControl>
+                      <Input value={selectedCliente.direccion || ''} readOnly className="bg-muted" />
+                    </FormControl>
+                  </FormItem>
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input value={selectedCliente.correo_electronico || ''} readOnly className="bg-muted" />
+                    </FormControl>
+                  </FormItem>
+                  <FormItem>
+                    <FormLabel>Teléfono</FormLabel>
+                    <FormControl>
+                      <Input value={selectedCliente.telefono || ''} readOnly className="bg-muted" />
+                    </FormControl>
+                  </FormItem>
+                </div>
+              )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                      control={form.control}
+                      name="header.tipo_pago"
+                      render={({ field }) => (
+                          <FormItem>
+                              <FormLabel>Tipo de Pago</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                  <FormControl><SelectTrigger><SelectValue placeholder="Seleccione un tipo" /></SelectTrigger></FormControl>
+                                  <SelectContent>
+                                      <SelectItem value="Efectivo">Efectivo</SelectItem>
+                                      <SelectItem value="Tarjeta de Credito">Tarjeta de Crédito</SelectItem>
+                                      <SelectItem value="Transferencia">Transferencia</SelectItem>
+                                      <SelectItem value="Credito">Crédito</SelectItem>
+                                  </SelectContent>
+                              </Select>
+                              <FormMessage />
+                          </FormItem>
+                      )}
+                  />
+                  <FormField
+                      control={form.control}
+                      name="header.estado_factura"
+                      render={({ field }) => (
+                          <FormItem>
+                              <FormLabel>Estado de la Factura</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                  <FormControl><SelectTrigger><SelectValue placeholder="Seleccione un estado" /></SelectTrigger></FormControl>
+                                  <SelectContent>
+                                      <SelectItem value="Pagada">Pagada</SelectItem>
+                                      <SelectItem value="Pendiente">Pendiente</SelectItem>
+                                      <SelectItem value="Anulada">Anulada</SelectItem>
+                                      <SelectItem value="No Pagada">No Pagada</SelectItem>
+                                  </SelectContent>
+                              </Select>
+                              <FormMessage />
+                          </FormItem>
+                      )}
+                  />
+              </div>
             </CardContent>
-        </Card>
-        
-        <div className="flex justify-end items-center gap-6 p-4 border rounded-lg">
-            <div className="text-xl font-bold">Total Factura:</div>
-            <div className="text-2xl font-bold text-primary">${totalFactura.toFixed(2)}</div>
-        </div>
+          </Card>
 
+          <Separator />
 
-        <Button type="submit" className="w-full md:w-auto" disabled={isPending}>
-          {isPending ? "Guardando Factura..." : "Guardar Factura"}
-        </Button>
-      </form>
-    </Form>
+          {/* Invoice Details */}
+          <Card>
+              <CardHeader>
+                  <CardTitle>Detalles de la Factura</CardTitle>
+                  <CardDescription>Agregue los productos a la factura.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                  {fields.map((field, index) => {
+                      const selectedProductoId = detalles[index]?.id_producto;
+                      const producto = productos.find(p => p.id_producto === Number(selectedProductoId));
+                      const subtotal = (producto?.precio || 0) * (detalles[index]?.cantidad || 0);
+
+                      return (
+                          <div key={field.id} className="flex flex-wrap md:flex-nowrap items-start gap-4 p-4 border rounded-lg relative">
+                              <FormField
+                                  control={form.control}
+                                  name={`detalles.${index}.id_producto`}
+                                  render={({ field }) => (
+                                      <FormItem className="flex-1 min-w-[200px]">
+                                          <FormLabel>Producto</FormLabel>
+                                          <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
+                                              <FormControl><SelectTrigger><SelectValue placeholder="Seleccione un producto" /></SelectTrigger></FormControl>
+                                              <SelectContent>
+                                                  {productos.map(p => (
+                                                      <SelectItem key={p.id_producto} value={String(p.id_producto)} disabled={selectedProductIds.includes(p.id_producto) && p.id_producto !== Number(field.value)}>
+                                                          {p.nombre}
+                                                      </SelectItem>
+                                                  ))}
+                                              </SelectContent>
+                                          </Select>
+                                          <FormMessage />
+                                      </FormItem>
+                                  )}
+                              />
+                              <FormField
+                                  control={form.control}
+                                  name={`detalles.${index}.cantidad`}
+                                  render={({ field }) => (
+                                      <FormItem className="w-full md:w-24">
+                                          <FormLabel>Cantidad</FormLabel>
+                                          <FormControl><Input type="number" min="1" {...field} /></FormControl>
+                                          <FormMessage />
+                                      </FormItem>
+                                  )}
+                              />
+                              <FormItem className="w-full md:w-24">
+                                  <FormLabel>Stock Disp.</FormLabel>
+                                  <Input value={producto?.stock_disponible ?? 'N/A'} readOnly className="bg-muted"/>
+                              </FormItem>
+                              <FormItem className="w-full md:w-32">
+                                  <FormLabel>Precio Unit.</FormLabel>
+                                  <Input value={`$${(producto?.precio || 0).toFixed(2)}`} readOnly className="bg-muted"/>
+                              </FormItem>
+                              <FormItem className="w-full md:w-32">
+                                  <FormLabel>Subtotal</FormLabel>
+                                  <Input value={`$${subtotal.toFixed(2)}`} readOnly className="bg-muted" />
+                              </FormItem>
+                              <Button type="button" variant="ghost" size="icon" className="text-destructive absolute top-1 right-1" onClick={() => remove(index)} disabled={fields.length <= 1}>
+                                  <Trash2 className="h-4 w-4"/>
+                              </Button>
+                          </div>
+                      )
+                  })}
+
+                  <Button type="button" variant="outline" size="sm" onClick={() => append({ id_producto: undefined, cantidad: 1 })}>
+                      <Plus className="mr-2 h-4 w-4" /> Agregar Detalle
+                  </Button>
+              </CardContent>
+          </Card>
+          
+          <div className="flex justify-end items-center gap-6 p-4 border rounded-lg">
+              <div className="text-xl font-bold">Total Factura:</div>
+              <div className="text-2xl font-bold text-primary">${totalFactura.toFixed(2)}</div>
+          </div>
+        </form>
+      </Form>
+      <AlertDialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+            <AlertDialogTitle>¿Está seguro de que desea cancelar?</AlertDialogTitle>
+            <AlertDialogDescription>
+                Todos los cambios no guardados se perderán. Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+            <AlertDialogCancel>Continuar Editando</AlertDialogCancel>
+            <AlertDialogAction onClick={() => router.push('/facturas')}>
+                Sí, Cancelar
+            </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

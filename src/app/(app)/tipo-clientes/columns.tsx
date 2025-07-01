@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { MoreHorizontal } from "lucide-react"
+import { MoreHorizontal, ArrowUpDown } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 export const getColumns = (
@@ -70,15 +70,47 @@ export const getColumns = (
   },
   {
     accessorKey: "id_tipcli",
-    header: "ID",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          ID
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
   },
   {
     accessorKey: "nombre",
-    header: "Nombre",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Nombre
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
   },
   {
     accessorKey: "monto_maximo",
-    header: "Monto Máximo",
+    header: ({ column }) => {
+        return (
+          <div className="flex justify-end">
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+              Monto Máximo
+              <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        )
+    },
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("monto_maximo"))
       const formatted = new Intl.NumberFormat("es-EC", {
