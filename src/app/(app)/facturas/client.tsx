@@ -30,19 +30,24 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
 
+interface DetalleResponse {
+    id_factura: number;
+    detalles: DetalleFactura[];
+}
+
 async function getDetalles(facturaId: number): Promise<DetalleFactura[]> {
     try {
-        const res = await fetch(`https://apdis-p5v5.vercel.app/api/detalle_facturas/?id_factura=${facturaId}`, { cache: 'no-store' });
+        const res = await fetch(`https://apdis-p5v5.vercel.app/api/detalle_facturas/`, { cache: 'no-store' });
         if (!res.ok) {
             console.error(`Failed to fetch details for factura ${facturaId}`);
             return [];
         }
-        const data = await res.json();
-        // The API returns an array with one object which contains the details array.
-        if (Array.isArray(data) && data.length > 0 && data[0].detalles) {
-            return data[0].detalles;
-        }
-        return [];
+        
+        const allDetails: DetalleResponse[] = await res.json();
+        
+        const facturaDetails = allDetails.find(item => item.id_factura === facturaId);
+
+        return facturaDetails ? facturaDetails.detalles : [];
     } catch (error) {
         console.error("Error parsing details response:", error);
         return [];
