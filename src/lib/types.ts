@@ -2,6 +2,7 @@ export interface TipoCliente {
   id_tipcli: number;
   nombre: string;
   monto_maximo: number;
+  isDeletable?: boolean;
 }
 
 export interface Cliente {
@@ -17,6 +18,7 @@ export interface Cliente {
   numero_identificacion: string;
   fecha_nacimiento: string;
   nombre_tipo_cliente?: string;
+  isDeletable?: boolean;
 }
 
 export interface Factura {
@@ -29,6 +31,7 @@ export interface Factura {
   estado_factura: string;
   cliente?: Cliente;
   detalles?: DetalleFactura[];
+  isDeletable?: boolean;
 }
 
 export interface DetalleFactura {

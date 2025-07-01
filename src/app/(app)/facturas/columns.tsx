@@ -13,11 +13,31 @@ import {
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { MoreHorizontal } from "lucide-react"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 export const getColumns = (
   onDelete: (id: number) => void,
   onViewDetails: (factura: Factura) => void
 ): ColumnDef<Factura>[] => [
+  {
+    id: "uso",
+    header: "Uso",
+    cell: ({ row }) => {
+      const isDeletable = row.original.isDeletable
+      const tooltipText = isDeletable ? "Este registro puede ser eliminado." : "Este registro está en uso y no puede ser eliminado."
+
+      return (
+        <Tooltip>
+          <TooltipTrigger>
+            <div className={`h-2.5 w-2.5 rounded-full ${isDeletable ? 'bg-green-500' : 'bg-red-500'}`} />
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{tooltipText}</p>
+          </TooltipContent>
+        </Tooltip>
+      )
+    },
+  },
   {
     id: "actions",
     cell: ({ row }) => {
@@ -36,7 +56,11 @@ export const getColumns = (
             <DropdownMenuItem onClick={() => onViewDetails(factura)}>
               Mostrar Detalles
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onDelete(factura.id_factura)} className="text-destructive">
+            <DropdownMenuItem 
+                onClick={() => onDelete(factura.id_factura)} 
+                className="text-destructive"
+                disabled={!factura.isDeletable}
+            >
               Eliminar
             </DropdownMenuItem>
           </DropdownMenuContent>

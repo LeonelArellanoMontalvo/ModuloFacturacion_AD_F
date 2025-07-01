@@ -154,6 +154,7 @@ export function ClientesClient({ data, tipos }: ClientesClientProps) {
             <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
             <AlertDialogDescription>
                 Esta acción no se puede deshacer. Esto eliminará permanentemente al cliente.
+                Si el registro está en uso, la eliminación fallará.
             </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
