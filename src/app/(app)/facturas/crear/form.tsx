@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useMemo, useState, useTransition } from "react"
+import React, { useMemo, useTransition } from "react"
 import { useForm, useFieldArray, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -30,8 +30,28 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
   const router = useRouter()
   const { toast } = useToast()
 
+  const facturaSchemaWithStockValidation = useMemo(() => {
+    return facturaSchema.superRefine((data, ctx) => {
+      data.detalles.forEach((detalle, index) => {
+        if (!detalle.id_producto) return;
+        
+        const producto = productos.find(p => p.id_producto === Number(detalle.id_producto));
+        if (producto) {
+            if (Number(detalle.cantidad) > producto.stock_disponible) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: `Stock insuficiente. Disp: ${producto.stock_disponible}`,
+                    path: [`detalles`, index, `cantidad`],
+                });
+            }
+        }
+      });
+    });
+  }, [productos]);
+
   const form = useForm<FormValues>({
-    resolver: zodResolver(facturaSchema),
+    resolver: zodResolver(facturaSchemaWithStockValidation),
+    mode: "onChange",
     defaultValues: {
       header: {
         id_cliente: undefined,
