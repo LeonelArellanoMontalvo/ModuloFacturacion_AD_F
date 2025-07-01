@@ -127,7 +127,19 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
               )}
             />
             {selectedCliente && (
-               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <FormItem>
+                  <FormLabel>Tipo Identificación</FormLabel>
+                  <FormControl>
+                    <Input value={selectedCliente.tipo_identificacion || ''} readOnly className="bg-muted" />
+                  </FormControl>
+                </FormItem>
+                <FormItem>
+                  <FormLabel>N° Identificación</FormLabel>
+                  <FormControl>
+                    <Input value={selectedCliente.numero_identificacion || ''} readOnly className="bg-muted" />
+                  </FormControl>
+                </FormItem>
                 <FormItem>
                   <FormLabel>Dirección</FormLabel>
                   <FormControl>
