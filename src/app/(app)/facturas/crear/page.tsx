@@ -19,7 +19,8 @@ async function getData(): Promise<{ clientes: Cliente[], productos: Producto[] }
         // Transform products to match the internal Producto interface
         const productos: Producto[] = productosData.map((p: any) => ({
             ...p,
-            precio: parseFloat(p.precio_unitario) // Convert precio_unitario string to a number for calculations
+            precio: parseFloat(p.precio_unitario), // Convert precio_unitario string to a number for calculations
+            stock_disponible: Number(p.stock_minimo) // Map stock_minimo to stock_disponible
         }));
         
         const activeClientes = clientes.filter(c => c.estado?.toLowerCase() === 'activo');
