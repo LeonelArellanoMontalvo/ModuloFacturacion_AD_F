@@ -53,7 +53,11 @@ export const getColumns = (
     header: "ID",
   },
   {
-    accessorKey: "cliente",
+    id: "cliente_nombre",
+    accessorFn: row => {
+      const cliente = row.cliente;
+      return cliente ? `${cliente.nombre} ${cliente.apellido}` : "";
+    },
     header: "Cliente",
     cell: ({ row }) => {
       const cliente = row.original.cliente;

@@ -110,6 +110,12 @@ export function FacturasClient({ data, clientes }: FacturasClientProps) {
   
   const columns = useMemo(() => getColumns(handleDeleteRequest, handleViewDetails), [handleDeleteRequest, handleViewDetails]);
 
+  const filterOptions = [
+    { value: "numero_factura", label: "N° Factura" },
+    { value: "cliente_nombre", label: "Cliente" },
+    { value: "estado_factura", label: "Estado" },
+  ];
+
   return (
     <>
       {noClientes && (
@@ -124,6 +130,7 @@ export function FacturasClient({ data, clientes }: FacturasClientProps) {
       <DataTable
         columns={columns}
         data={data}
+        filterOptions={filterOptions}
         toolbar={
           <Link href="/facturas/crear" passHref>
             <Button disabled={noClientes}>
