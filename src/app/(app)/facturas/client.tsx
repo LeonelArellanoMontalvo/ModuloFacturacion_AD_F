@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useTransition, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Factura, Cliente, DetalleFactura } from "@/lib/types";
 import { getColumns } from "./columns";
 import { DataTable } from "@/components/data-table";
@@ -61,6 +62,7 @@ interface FacturasClientProps {
 }
 
 export function FacturasClient({ data, clientes }: FacturasClientProps) {
+  const router = useRouter();
   const { toast } = useToast();
 
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -86,6 +88,10 @@ export function FacturasClient({ data, clientes }: FacturasClientProps) {
     setFacturaToDelete(id);
     setIsDeleteDialogOpen(true);
   }, []);
+  
+  const handlePrintRequest = useCallback((id: number) => {
+    router.push(`/facturas/${id}/imprimir`);
+  }, [router]);
 
   const handleDeleteConfirm = useCallback(() => {
     if (facturaToDelete === null) return;
@@ -108,7 +114,7 @@ export function FacturasClient({ data, clientes }: FacturasClientProps) {
     });
   }, [facturaToDelete, toast]);
   
-  const columns = useMemo(() => getColumns(handleDeleteRequest, handleViewDetails), [handleDeleteRequest, handleViewDetails]);
+  const columns = useMemo(() => getColumns(handleDeleteRequest, handleViewDetails, handlePrintRequest), [handleDeleteRequest, handleViewDetails, handlePrintRequest]);
 
   const filterOptions = [
     { value: "numero_factura", label: "N° Factura" },

@@ -89,7 +89,6 @@ export async function deleteTipoCliente(id: number) {
 async function handleClienteError(error: any): Promise<{ error: string, field?: string }> {
     try {
         const errorData = JSON.parse(error.message);
-        // Handle specific field errors from backend
         if (errorData.details && (errorData.details.toLowerCase().includes('cédula inválida') || errorData.details.toLowerCase().includes('ruc inválido'))) {
             return { error: errorData.details, field: 'numero_identificacion' };
         }
@@ -97,7 +96,6 @@ async function handleClienteError(error: any): Promise<{ error: string, field?: 
              return { error: "Un cliente con este número de identificación ya existe.", field: 'numero_identificacion' };
         }
     } catch (e) {
-        // Fallback for non-json or differently structured errors
         if (error.message?.includes("already exists")) {
             return { error: "Un cliente con este número de identificación ya existe.", field: 'numero_identificacion' };
         }
@@ -106,53 +104,48 @@ async function handleClienteError(error: any): Promise<{ error: string, field?: 
 }
 
 export async function createCliente(formData: z.infer<typeof clienteSchema>) {
-  const validatedFields = clienteSchema.safeParse(formData);
-  if (!validatedFields.success) {
-    console.error(validatedFields.error.flatten().fieldErrors);
-    return { error: "Datos inválidos." };
-  }
-
-  const { fecha_nacimiento, ...rest } = validatedFields.data;
-  const payload = {
-    ...rest,
-    fecha_nacimiento: fecha_nacimiento.toISOString().split('T')[0],
-  };
-
-  try {
-    await apiCall('/clientes/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    revalidatePath('/clientes');
-    return { success: "Cliente creado." };
-  } catch (error: any) {
-    return handleClienteError(error);
-  }
+    const validatedFields = clienteSchema.safeParse(formData);
+    if (!validatedFields.success) {
+        return { error: "Datos inválidos.", fieldErrors: validatedFields.error.flatten().fieldErrors };
+    }
+    const { fecha_nacimiento, ...rest } = validatedFields.data;
+    const payload = {
+        ...rest,
+        fecha_nacimiento: fecha_nacimiento.toISOString().split('T')[0],
+    };
+    try {
+        await apiCall('/clientes/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+        revalidatePath('/clientes');
+        return { success: "Cliente creado." };
+    } catch (error: any) {
+        return handleClienteError(error);
+    }
 }
 
 export async function updateCliente(id: number, formData: z.infer<typeof clienteSchema>) {
     const validatedFields = clienteSchema.safeParse(formData);
     if (!validatedFields.success) {
-        return { error: "Datos inválidos." };
+        return { error: "Datos inválidos.", fieldErrors: validatedFields.error.flatten().fieldErrors };
     }
-
     const { fecha_nacimiento, ...rest } = validatedFields.data;
     const payload = {
-      ...rest,
-      fecha_nacimiento: fecha_nacimiento.toISOString().split('T')[0],
+        ...rest,
+        fecha_nacimiento: fecha_nacimiento.toISOString().split('T')[0],
     };
-
     try {
-      await apiCall(`/clientes/${id}/`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-      });
-      revalidatePath('/clientes');
-      return { success: "Cliente actualizado." };
+        await apiCall(`/clientes/${id}/`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+        revalidatePath('/clientes');
+        return { success: "Cliente actualizado." };
     } catch (error: any) {
-      return handleClienteError(error);
+        return handleClienteError(error);
     }
 }
 
@@ -199,14 +192,14 @@ export async function createFactura(formData: z.infer<typeof facturaSchema>) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(detallesPayload),
     });
-    
+
+    revalidatePath('/facturas');
+    return { success: true, newFacturaId: newFactura.id_factura };
+
   } catch (error) {
     console.error("Error al crear factura:", error);
     return { error: (error as Error).message || "Ocurrió un error al guardar la factura." };
   }
-
-  revalidatePath('/facturas');
-  return { success: "Factura creada exitosamente" };
 }
 
 

@@ -17,7 +17,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 
 export const getColumns = (
   onDelete: (id: number) => void,
-  onViewDetails: (factura: Factura) => void
+  onViewDetails: (factura: Factura) => void,
+  onPrint: (id: number) => void
 ): ColumnDef<Factura>[] => [
   {
     id: "uso",
@@ -55,6 +56,9 @@ export const getColumns = (
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => onViewDetails(factura)}>
               Mostrar Detalles
+            </DropdownMenuItem>
+             <DropdownMenuItem onClick={() => onPrint(factura.id_factura)}>
+              Imprimir
             </DropdownMenuItem>
             <DropdownMenuItem 
                 onClick={() => onDelete(factura.id_factura)} 

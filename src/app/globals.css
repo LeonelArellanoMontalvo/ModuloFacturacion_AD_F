@@ -86,3 +86,26 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  @media print {
+    body * {
+      visibility: hidden;
+    }
+    .printable-area,
+    .printable-area * {
+      visibility: visible;
+    }
+    .printable-area {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      margin: 0;
+      padding: 1rem;
+    }
+    .no-print {
+      display: none !important;
+    }
+  }
+}

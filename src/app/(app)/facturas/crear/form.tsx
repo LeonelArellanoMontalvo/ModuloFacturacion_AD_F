@@ -88,18 +88,18 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
   const onSubmit = (values: FormValues) => {
     startTransition(async () => {
       const result = await createFactura(values);
-      if (result?.error) {
+      if (result?.success && result.newFacturaId) {
+        toast({
+          title: "Factura Creada",
+          description: "La factura se ha guardado exitosamente.",
+        });
+        router.push(`/facturas/${result.newFacturaId}/imprimir`);
+      } else if (result?.error) {
         toast({
           title: "Error al crear factura",
           description: result.error,
           variant: "destructive",
         })
-      } else {
-        toast({
-          title: "Factura Creada",
-          description: "La factura se ha guardado exitosamente.",
-        })
-        router.push('/facturas');
       }
     })
   }
