@@ -13,8 +13,8 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { ClienteForm, FormValues } from "./form";
-import { createCliente, updateCliente, deleteCliente } from "@/lib/actions";
+import { ClienteForm } from "./form";
+import { deleteCliente } from "@/lib/actions";
 import { useToast } from "@/hooks/use-toast";
 import {
     AlertDialog,
@@ -34,7 +34,7 @@ interface ClientesClientProps {
 }
 
 export function ClientesClient({ data, tipos }: ClientesClientProps) {
-  const [isPending, startTransition] = useTransition();
+  const [isDeleting, startDeleting] = useTransition();
   const { toast } = useToast();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -62,7 +62,7 @@ export function ClientesClient({ data, tipos }: ClientesClientProps) {
 
   const handleDeleteConfirm = () => {
     if (clienteToDelete === null) return;
-    startTransition(async () => {
+    startDeleting(async () => {
         const result = await deleteCliente(clienteToDelete);
         if (result?.error) {
             toast({
@@ -81,26 +81,9 @@ export function ClientesClient({ data, tipos }: ClientesClientProps) {
     });
   };
 
-  const handleSubmit = (values: FormValues) => {
-    startTransition(async () => {
-      const action = currentCliente ? updateCliente(currentCliente.id_cliente, values) : createCliente(values);
-      const result = await action;
-
-      if (result?.error) {
-        toast({
-          title: "Error",
-          description: result.error,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Éxito",
-          description: `Cliente ${currentCliente ? 'actualizado' : 'creado'} con éxito.`,
-        });
-        setIsDialogOpen(false);
-        setCurrentCliente(null);
-      }
-    });
+  const handleSuccess = () => {
+    setIsDialogOpen(false);
+    setCurrentCliente(null);
   };
 
   const columns = useMemo(() => getColumns(handleEdit, handleDeleteRequest), []);
@@ -142,11 +125,10 @@ export function ClientesClient({ data, tipos }: ClientesClientProps) {
             </DialogDescription>
           </DialogHeader>
           <ClienteForm
-            onSubmit={handleSubmit}
             defaultValues={currentCliente}
-            isPending={isPending}
             tipos={tipos}
             onCancel={() => setIsDialogOpen(false)}
+            onSuccess={handleSuccess}
           />
         </DialogContent>
       </Dialog>
@@ -161,8 +143,8 @@ export function ClientesClient({ data, tipos }: ClientesClientProps) {
             </AlertDialogHeader>
             <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm} disabled={isPending}>
-                {isPending ? "Eliminando..." : "Eliminar"}
+            <AlertDialogAction onClick={handleDeleteConfirm} disabled={isDeleting}>
+                {isDeleting ? "Eliminando..." : "Eliminar"}
             </AlertDialogAction>
             </AlertDialogFooter>
         </AlertDialogContent>

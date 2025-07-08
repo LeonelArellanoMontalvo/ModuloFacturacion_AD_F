@@ -15,7 +15,8 @@ async function apiCall(path: string, options: RequestInit) {
     if (!response.ok) {
       const errorBody = await response.text();
       console.error(`API Error (${response.status}) on ${options.method} ${url}:`, errorBody);
-      throw new Error(`Error en la solicitud: ${response.statusText} - ${errorBody}`);
+      // Throw the body so it can be parsed by the calling function
+      throw new Error(errorBody);
     }
     // For DELETE requests, response might be empty
     if (response.status === 204 || response.headers.get('content-length') === '0') {
@@ -85,6 +86,25 @@ export async function deleteTipoCliente(id: number) {
 
 
 // Cliente Actions
+async function handleClienteError(error: any): Promise<{ error: string, field?: string }> {
+    try {
+        const errorData = JSON.parse(error.message);
+        // Handle specific field errors from backend
+        if (errorData.details && (errorData.details.toLowerCase().includes('cédula inválida') || errorData.details.toLowerCase().includes('ruc inválido'))) {
+            return { error: errorData.details, field: 'numero_identificacion' };
+        }
+        if (errorData.numero_identificacion) {
+             return { error: "Un cliente con este número de identificación ya existe.", field: 'numero_identificacion' };
+        }
+    } catch (e) {
+        // Fallback for non-json or differently structured errors
+        if (error.message?.includes("already exists")) {
+            return { error: "Un cliente con este número de identificación ya existe.", field: 'numero_identificacion' };
+        }
+    }
+    return { error: "No se pudo procesar la solicitud. Verifique los datos e intente de nuevo." };
+}
+
 export async function createCliente(formData: z.infer<typeof clienteSchema>) {
   const validatedFields = clienteSchema.safeParse(formData);
   if (!validatedFields.success) {
@@ -107,11 +127,7 @@ export async function createCliente(formData: z.infer<typeof clienteSchema>) {
     revalidatePath('/clientes');
     return { success: "Cliente creado." };
   } catch (error: any) {
-    const message = error.message as string;
-    if (message?.includes("already exists")) {
-      return { error: "Un cliente con este número de identificación ya existe." };
-    }
-    return { error: "No se pudo crear el cliente." };
+    return handleClienteError(error);
   }
 }
 
@@ -136,11 +152,7 @@ export async function updateCliente(id: number, formData: z.infer<typeof cliente
       revalidatePath('/clientes');
       return { success: "Cliente actualizado." };
     } catch (error: any) {
-      const message = error.message as string;
-      if (message?.includes("already exists")) {
-        return { error: "Un cliente con este número de identificación ya existe." };
-      }
-      return { error: "No se pudo actualizar el cliente." };
+      return handleClienteError(error);
     }
 }
 

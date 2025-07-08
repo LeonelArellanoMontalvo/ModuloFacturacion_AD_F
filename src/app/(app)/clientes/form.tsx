@@ -27,18 +27,23 @@ import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { useTransition } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { createCliente, updateCliente } from "@/lib/actions";
 
 export type FormValues = z.infer<typeof clienteSchema>;
 
 interface ClienteFormProps {
-  onSubmit: (values: FormValues) => void;
   defaultValues?: Cliente | null;
-  isPending: boolean;
   tipos: TipoCliente[];
   onCancel: () => void;
+  onSuccess: () => void;
 }
 
-export function ClienteForm({ onSubmit, defaultValues, isPending, tipos, onCancel }: ClienteFormProps) {
+export function ClienteForm({ defaultValues, tipos, onCancel, onSuccess }: ClienteFormProps) {
+  const [isPending, startTransition] = useTransition();
+  const { toast } = useToast();
+
   const form = useForm<FormValues>({
     resolver: zodResolver(clienteSchema),
     defaultValues: {
@@ -54,6 +59,34 @@ export function ClienteForm({ onSubmit, defaultValues, isPending, tipos, onCance
       estado: defaultValues?.estado || "Activo",
     },
   });
+
+  const onSubmit = (values: FormValues) => {
+    startTransition(async () => {
+      const action = defaultValues ? updateCliente(defaultValues.id_cliente, values) : createCliente(values);
+      const result = await action;
+
+      if (result?.error) {
+        if (result.field) {
+            form.setError(result.field as keyof FormValues, {
+                type: "server",
+                message: result.error,
+            });
+        } else {
+            toast({
+                title: "Error",
+                description: result.error,
+                variant: "destructive",
+            });
+        }
+      } else {
+        toast({
+          title: "Éxito",
+          description: `Cliente ${defaultValues ? 'actualizado' : 'creado'} con éxito.`,
+        });
+        onSuccess();
+      }
+    });
+  };
 
   return (
     <Form {...form}>
