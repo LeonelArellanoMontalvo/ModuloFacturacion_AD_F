@@ -35,9 +35,10 @@ interface ClienteFormProps {
   defaultValues?: Cliente | null;
   isPending: boolean;
   tipos: TipoCliente[];
+  onCancel: () => void;
 }
 
-export function ClienteForm({ onSubmit, defaultValues, isPending, tipos }: ClienteFormProps) {
+export function ClienteForm({ onSubmit, defaultValues, isPending, tipos, onCancel }: ClienteFormProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(clienteSchema),
     defaultValues: {
@@ -152,6 +153,9 @@ export function ClienteForm({ onSubmit, defaultValues, isPending, tipos }: Clien
                       date > new Date() || date < new Date("1900-01-01")
                     }
                     initialFocus
+                    captionLayout="dropdown-buttons"
+                    fromYear={1900}
+                    toYear={new Date().getFullYear()}
                   />
                 </PopoverContent>
               </Popover>
@@ -240,9 +244,14 @@ export function ClienteForm({ onSubmit, defaultValues, isPending, tipos }: Clien
                 </FormItem>
             )}
         />
-        <Button type="submit" disabled={isPending}>
-          {isPending ? "Guardando..." : "Guardar"}
-        </Button>
+        <div className="flex justify-end gap-2 pt-4">
+            <Button type="button" variant="outline" onClick={onCancel}>
+                Cancelar
+            </Button>
+            <Button type="submit" disabled={isPending}>
+                {isPending ? "Guardando..." : "Guardar"}
+            </Button>
+        </div>
       </form>
     </Form>
   );

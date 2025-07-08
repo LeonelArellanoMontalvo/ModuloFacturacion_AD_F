@@ -126,6 +126,7 @@ export function TipoClientesClient({ data }: TipoClientesClientProps) {
             onSubmit={handleSubmit}
             defaultValues={currentTipo}
             isPending={isPending}
+            onCancel={() => setIsDialogOpen(false)}
           />
         </DialogContent>
       </Dialog>

@@ -4,7 +4,7 @@ export const tipoClienteSchema = z.object({
   nombre: z.string()
     .min(3, "El nombre debe tener al menos 3 caracteres.")
     .regex(/^[a-zA-ZÀ-ÿ\s]+$/, "El nombre solo debe contener letras y espacios."),
-  monto_maximo: z.coerce.number().min(100, "El monto máximo no puede ser menor que 100."),
+  monto_maximo: z.coerce.number().min(0, "El monto máximo no puede ser menor que 0."),
 });
 
 export const clienteSchema = z.object({

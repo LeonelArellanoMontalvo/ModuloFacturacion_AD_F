@@ -31,6 +31,7 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const router = useRouter()
   const { toast } = useToast()
+  const [productSearch, setProductSearch] = useState("");
 
   const facturaSchemaWithStockValidation = useMemo(() => {
     return facturaSchema.superRefine((data, ctx) => {
@@ -101,6 +102,11 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
       }
     })
   }
+  
+  const filteredProductos = useMemo(() => {
+    if (!productSearch) return productos;
+    return productos.filter(p => p.nombre.toLowerCase().includes(productSearch.toLowerCase()));
+  }, [productSearch, productos]);
 
   const selectedProductIds = useMemo(() => detalles.map(d => Number(d.id_producto)), [detalles]);
 
@@ -240,11 +246,23 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
                                           <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
                                               <FormControl><SelectTrigger><SelectValue placeholder="Seleccione un producto" /></SelectTrigger></FormControl>
                                               <SelectContent>
-                                                  {productos.map(p => (
-                                                      <SelectItem key={p.id_producto} value={String(p.id_producto)} disabled={selectedProductIds.includes(p.id_producto) && p.id_producto !== Number(field.value)}>
-                                                          {p.nombre}
-                                                      </SelectItem>
-                                                  ))}
+                                                  <div className="p-2">
+                                                    <Input
+                                                      placeholder="Buscar producto..."
+                                                      value={productSearch}
+                                                      onChange={(e) => setProductSearch(e.target.value)}
+                                                      autoFocus
+                                                      className="w-full"
+                                                    />
+                                                  </div>
+                                                  <Separator />
+                                                  <div className="max-h-[200px] overflow-y-auto">
+                                                    {filteredProductos.map(p => (
+                                                        <SelectItem key={p.id_producto} value={String(p.id_producto)} disabled={selectedProductIds.includes(p.id_producto) && p.id_producto !== Number(field.value)}>
+                                                            {p.nombre}
+                                                        </SelectItem>
+                                                    ))}
+                                                  </div>
                                               </SelectContent>
                                           </Select>
                                           <FormMessage />

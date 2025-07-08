@@ -22,9 +22,10 @@ interface TipoClienteFormProps {
   onSubmit: (values: FormValues) => void;
   defaultValues?: TipoCliente | null;
   isPending: boolean;
+  onCancel: () => void;
 }
 
-export function TipoClienteForm({ onSubmit, defaultValues, isPending }: TipoClienteFormProps) {
+export function TipoClienteForm({ onSubmit, defaultValues, isPending, onCancel }: TipoClienteFormProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(tipoClienteSchema),
     defaultValues: {
@@ -62,9 +63,14 @@ export function TipoClienteForm({ onSubmit, defaultValues, isPending }: TipoClie
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={isPending}>
-          {isPending ? "Guardando..." : "Guardar"}
-        </Button>
+        <div className="flex justify-end gap-2 pt-4">
+            <Button type="button" variant="outline" onClick={onCancel}>
+                Cancelar
+            </Button>
+            <Button type="submit" disabled={isPending}>
+              {isPending ? "Guardando..." : "Guardar"}
+            </Button>
+        </div>
       </form>
     </Form>
   )

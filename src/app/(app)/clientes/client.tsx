@@ -108,6 +108,7 @@ export function ClientesClient({ data, tipos }: ClientesClientProps) {
     { value: "nombre_completo", label: "Nombre" },
     { value: "numero_identificacion", label: "Identificación" },
     { value: "nombre_tipo_cliente", label: "Tipo" },
+    { value: "estado", label: "Estado" },
   ];
 
   return (
@@ -145,6 +146,7 @@ export function ClientesClient({ data, tipos }: ClientesClientProps) {
             defaultValues={currentCliente}
             isPending={isPending}
             tipos={tipos}
+            onCancel={() => setIsDialogOpen(false)}
           />
         </DialogContent>
       </Dialog>
