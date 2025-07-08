@@ -25,7 +25,11 @@ async function getData(id: string): Promise<{ factura: Factura | null; cliente: 
         ]);
 
         if (!facturaRes.ok) throw new Error('No se pudo obtener la factura');
-        const factura: Factura = await facturaRes.json();
+        const facturaData: any = await facturaRes.json();
+        const factura: Factura = {
+            ...facturaData,
+            monto_total: parseFloat(facturaData.monto_total || '0')
+        };
         
         if (!detallesRes.ok) throw new Error('No se pudieron obtener los detalles de la factura');
         const allDetails: DetalleResponse[] = await detallesRes.json();
