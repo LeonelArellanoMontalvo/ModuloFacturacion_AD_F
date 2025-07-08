@@ -32,6 +32,7 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
   const router = useRouter()
   const { toast } = useToast()
   const [productSearch, setProductSearch] = useState("");
+  const [clientSearch, setClientSearch] = useState("");
 
   const facturaSchemaWithStockValidation = useMemo(() => {
     return facturaSchema.superRefine((data, ctx) => {
@@ -102,6 +103,15 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
       }
     })
   }
+
+  const filteredClientes = useMemo(() => {
+    if (!clientSearch) return clientes;
+    const searchLower = clientSearch.toLowerCase();
+    return clientes.filter(c => 
+      `${c.nombre} ${c.apellido}`.toLowerCase().includes(searchLower) ||
+      c.numero_identificacion.includes(searchLower)
+    );
+  }, [clientSearch, clientes]);
   
   const filteredProductos = useMemo(() => {
     if (!productSearch) return productos;
@@ -138,7 +148,24 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
                     <FormLabel>Cliente</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
                       <FormControl><SelectTrigger><SelectValue placeholder="Seleccione un cliente" /></SelectTrigger></FormControl>
-                      <SelectContent>{clientes.map(c => <SelectItem key={c.id_cliente} value={String(c.id_cliente)}>{c.nombre} {c.apellido}</SelectItem>)}</SelectContent>
+                      <SelectContent>
+                        <div className="p-2">
+                          <Input
+                            placeholder="Buscar cliente por nombre o ID..."
+                            value={clientSearch}
+                            onChange={(e) => setClientSearch(e.target.value)}
+                            className="w-full"
+                          />
+                        </div>
+                        <Separator />
+                        <div className="max-h-[200px] overflow-y-auto">
+                          {filteredClientes.map(c => (
+                            <SelectItem key={c.id_cliente} value={String(c.id_cliente)}>
+                              {c.nombre} {c.apellido} ({c.numero_identificacion})
+                            </SelectItem>
+                          ))}
+                        </div>
+                      </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>

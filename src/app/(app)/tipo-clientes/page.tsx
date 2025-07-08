@@ -28,7 +28,9 @@ async function getData(): Promise<TipoCliente[]> {
         isDeletable: !usedTipoIds.has(tipo.id_tipcli)
     }));
     
-    return tiposWithStatus;
+    const sortedTipos = tiposWithStatus.sort((a, b) => b.id_tipcli - a.id_tipcli);
+    
+    return sortedTipos;
   } catch (error) {
     console.error(error);
     return [];

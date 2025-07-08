@@ -21,7 +21,9 @@ async function getData(): Promise<{facturas: Factura[], clientes: Cliente[]}> {
       monto_total: parseFloat(f.monto_total) // Ensure monto_total is a number
     }));
 
-    return { facturas, clientes };
+    const sortedFacturas = facturas.sort((a,b) => b.id_factura - a.id_factura);
+
+    return { facturas: sortedFacturas, clientes };
   } catch (error) {
     console.error(error);
     return { facturas: [], clientes: [] };

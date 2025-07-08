@@ -25,7 +25,9 @@ async function getData(): Promise<{ clientes: Cliente[], tipos: TipoCliente[] }>
       isDeletable: !usedClienteIds.has(cliente.id_cliente)
     }));
 
-    return { clientes: clientesWithStatus, tipos };
+    const sortedClientes = clientesWithStatus.sort((a, b) => b.id_cliente - a.id_cliente);
+
+    return { clientes: sortedClientes, tipos };
   } catch (error) {
     console.error(error);
     return { clientes: [], tipos: [] };
