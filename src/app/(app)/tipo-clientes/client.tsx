@@ -26,6 +26,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { useAuth } from "@/context/AuthContext"
 
 interface TipoClientesClientProps {
   data: TipoCliente[]
@@ -34,14 +35,17 @@ interface TipoClientesClientProps {
 export function TipoClientesClient({ data }: TipoClientesClientProps) {
   const [isPending, startTransition] = useTransition()
   const { toast } = useToast()
+  const { hasPermission } = useAuth();
   
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [currentTipo, setCurrentTipo] = useState<TipoCliente | null>(null)
   const [tipoToDelete, setTipoToDelete] = useState<number | null>(null)
 
+  const canCreate = hasPermission('Tipo de Clientes', 'C');
 
   const handleCreate = () => {
+    if (!canCreate) return;
     setCurrentTipo(null)
     setIsDialogOpen(true)
   }
@@ -99,7 +103,7 @@ export function TipoClientesClient({ data }: TipoClientesClientProps) {
     })
   }
 
-  const columns = useMemo(() => getColumns(handleEdit, handleDeleteRequest), [])
+  const columns = useMemo(() => getColumns(handleEdit, handleDeleteRequest, hasPermission), [hasPermission])
 
   return (
     <>
@@ -108,10 +112,12 @@ export function TipoClientesClient({ data }: TipoClientesClientProps) {
         data={data}
         filterKey="nombre"
         toolbar={
-          <Button onClick={handleCreate}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Crear Tipo
-          </Button>
+          canCreate ? (
+            <Button onClick={handleCreate}>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Crear Tipo
+            </Button>
+          ) : null
         }
       />
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

@@ -31,6 +31,7 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
+import { useAuth } from "@/context/AuthContext";
 
 interface DetalleResponse {
     id_factura: number;
@@ -65,6 +66,7 @@ interface FacturasClientProps {
 export function FacturasClient({ data, clientes }: FacturasClientProps) {
   const router = useRouter();
   const { toast } = useToast();
+  const { hasPermission } = useAuth();
 
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isDeleting, startDeleting] = useTransition();
@@ -75,6 +77,7 @@ export function FacturasClient({ data, clientes }: FacturasClientProps) {
   const [isLoadingDetalles, startLoadingDetalles] = useTransition();
 
   const noClientes = clientes.length === 0;
+  const canCreate = hasPermission('Facturas', 'C');
 
   const handleViewDetails = useCallback((factura: Factura) => {
     setSelectedFactura(factura);
@@ -115,7 +118,7 @@ export function FacturasClient({ data, clientes }: FacturasClientProps) {
     });
   }, [facturaToDelete, toast]);
   
-  const columns = useMemo(() => getColumns(handleDeleteRequest, handleViewDetails, handlePrintRequest), [handleDeleteRequest, handleViewDetails, handlePrintRequest]);
+  const columns = useMemo(() => getColumns(handleDeleteRequest, handleViewDetails, handlePrintRequest, hasPermission), [handleDeleteRequest, handleViewDetails, handlePrintRequest, hasPermission]);
 
   const filterOptions = [
     { value: "numero_factura", label: "N° Factura" },
@@ -139,12 +142,14 @@ export function FacturasClient({ data, clientes }: FacturasClientProps) {
         data={data}
         filterOptions={filterOptions}
         toolbar={
-          <Link href="/facturas/crear" passHref>
-            <Button disabled={noClientes}>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Crear Factura
-            </Button>
-          </Link>
+          canCreate ? (
+            <Link href="/facturas/crear" passHref>
+              <Button disabled={noClientes}>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Crear Factura
+              </Button>
+            </Link>
+          ) : null
         }
       />
 

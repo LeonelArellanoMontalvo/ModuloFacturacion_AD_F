@@ -27,6 +27,7 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useAuth } from "@/context/AuthContext";
 
 interface ClientesClientProps {
   data: Cliente[];
@@ -36,6 +37,7 @@ interface ClientesClientProps {
 export function ClientesClient({ data, tipos }: ClientesClientProps) {
   const [isDeleting, startDeleting] = useTransition();
   const { toast } = useToast();
+  const { hasPermission } = useAuth();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -44,8 +46,10 @@ export function ClientesClient({ data, tipos }: ClientesClientProps) {
 
   const noTipos = tipos.length === 0;
 
+  const canCreate = hasPermission('Clientes', 'C');
+
   const handleCreate = () => {
-    if (noTipos) return;
+    if (noTipos || !canCreate) return;
     setCurrentCliente(null);
     setIsDialogOpen(true);
   };
@@ -86,7 +90,7 @@ export function ClientesClient({ data, tipos }: ClientesClientProps) {
     setCurrentCliente(null);
   };
 
-  const columns = useMemo(() => getColumns(handleEdit, handleDeleteRequest), []);
+  const columns = useMemo(() => getColumns(handleEdit, handleDeleteRequest, hasPermission), [hasPermission]);
   const filterOptions = [
     { value: "nombre_completo", label: "Nombre" },
     { value: "numero_identificacion", label: "Identificación" },
@@ -110,10 +114,12 @@ export function ClientesClient({ data, tipos }: ClientesClientProps) {
         data={data}
         filterOptions={filterOptions}
         toolbar={
-          <Button onClick={handleCreate} disabled={noTipos}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Crear Cliente
-          </Button>
+          canCreate ? (
+            <Button onClick={handleCreate} disabled={noTipos}>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Crear Cliente
+            </Button>
+          ) : null
         }
       />
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

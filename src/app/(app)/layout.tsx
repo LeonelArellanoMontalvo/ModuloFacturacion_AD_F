@@ -1,4 +1,7 @@
-import React from "react";
+"use client";
+
+import React, { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   SidebarProvider,
   Sidebar,
@@ -10,8 +13,32 @@ import {
 } from "@/components/ui/sidebar";
 import { SidebarNav } from "@/components/layout/sidebar-nav";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from "@/context/AuthContext";
+import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
+  const { user, logout, loading, isDirectAccess } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !user && !isDirectAccess) {
+      router.push("/auth/login");
+    }
+  }, [user, loading, isDirectAccess, router]);
+
+  if (loading && !isDirectAccess) {
+    return (
+        <div className="flex h-screen items-center justify-center">
+            <p>Verificando credenciales...</p>
+        </div>
+    );
+  }
+
+  if (!user && !isDirectAccess) {
+    return null; // or a loading indicator
+  }
+
   return (
     <SidebarProvider>
       <Sidebar>
@@ -27,16 +54,35 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <SidebarNav />
         </SidebarContent>
         <SidebarFooter>
-          <div className="flex items-center gap-2">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src="https://placehold.co/100x100.png" alt="Admin" data-ai-hint="user avatar" />
-              <AvatarFallback>AD</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
-              <span className="text-sm font-semibold">Admin</span>
-              <span className="text-xs text-muted-foreground">admin@apdis.com</span>
+          {user ? (
+            <div className="w-full space-y-2">
+               <div className="flex items-center gap-2">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src="https://placehold.co/100x100.png" alt={user.usuario} data-ai-hint="user avatar" />
+                    <AvatarFallback>{user.usuario.substring(0, 2).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold">{user.usuario}</span>
+                    <span className="text-xs text-muted-foreground">{user.id_modulo}</span>
+                  </div>
+                </div>
+                <Button variant="ghost" size="sm" className="w-full justify-start" onClick={logout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Cerrar Sesión
+                </Button>
             </div>
-          </div>
+          ) : (
+             <div className="flex items-center gap-2">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src="https://placehold.co/100x100.png" alt="Admin" data-ai-hint="user avatar" />
+                  <AvatarFallback>AD</AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col">
+                  <span className="text-sm font-semibold">Admin</span>
+                  <span className="text-xs text-muted-foreground">(Acceso Directo)</span>
+                </div>
+              </div>
+          )}
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
