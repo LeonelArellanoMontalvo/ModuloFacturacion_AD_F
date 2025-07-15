@@ -49,9 +49,11 @@ export interface DetalleFactura {
 
 export interface Producto {
   id_producto: number;
+  codigo?: string;
   nombre: string;
   descripcion: string;
   precio: number;
+  costo?: number;
   stock_disponible: number;
   estado?: string;
   graba_iva?: boolean;

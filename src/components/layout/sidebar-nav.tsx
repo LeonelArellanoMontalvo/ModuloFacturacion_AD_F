@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Users, FileText, Tag } from 'lucide-react';
+import { Home, Users, FileText, Tag, Package } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import {
   SidebarMenu,
@@ -15,6 +15,7 @@ const navItems = [
   { href: "/tipo-clientes", label: "Tipos de Cliente", icon: Tag },
   { href: "/clientes", label: "Clientes", icon: Users },
   { href: "/facturas", label: "Facturas", icon: FileText },
+  { href: "/productos", label: "Productos", icon: Package },
 ];
 
 export function SidebarNav() {

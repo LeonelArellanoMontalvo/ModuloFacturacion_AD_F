@@ -59,7 +59,7 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
     defaultValues: {
       header: {
         id_cliente: undefined,
-        tipo_pago: "",
+        tipo_pago: "Efectivo",
         estado_factura: "Pendiente",
       },
       detalles: [{ id_producto: undefined, cantidad: 1 }],
@@ -216,8 +216,6 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
                                   <FormControl><SelectTrigger><SelectValue placeholder="Seleccione un tipo" /></SelectTrigger></FormControl>
                                   <SelectContent>
                                       <SelectItem value="Efectivo">Efectivo</SelectItem>
-                                      <SelectItem value="Tarjeta de Credito">Tarjeta de Crédito</SelectItem>
-                                      <SelectItem value="Transferencia">Transferencia</SelectItem>
                                       <SelectItem value="Credito">Crédito</SelectItem>
                                   </SelectContent>
                               </Select>
@@ -236,8 +234,6 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
                                   <SelectContent>
                                       <SelectItem value="Pagada">Pagada</SelectItem>
                                       <SelectItem value="Pendiente">Pendiente</SelectItem>
-                                      <SelectItem value="Anulada">Anulada</SelectItem>
-                                      <SelectItem value="No Pagada">No Pagada</SelectItem>
                                   </SelectContent>
                               </Select>
                               <FormMessage />
@@ -312,7 +308,7 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
                                   <Input value={producto?.stock_disponible ?? 'N/A'} readOnly className="bg-muted"/>
                               </FormItem>
                               <FormItem className="md:col-span-1">
-                                  <FormLabel>Graba IVA</FormLabel>
+                                  <FormLabel>IVA</FormLabel>
                                   <Input value={producto ? (producto.graba_iva ? 'Sí' : 'No') : 'N/A'} readOnly className="bg-muted text-center" />
                               </FormItem>
                               <FormItem className="md:col-span-2">
