@@ -16,7 +16,7 @@ import { createFactura } from "@/lib/actions"
 import { facturaSchema } from "@/lib/schemas"
 import type { Cliente, Producto, TipoCliente } from "@/lib/types"
 import { useToast } from "@/hooks/use-toast"
-import { Trash2, Plus, AlertTriangle, BadgeCheck, BadgeAlert } from "lucide-react"
+import { Trash2, Plus, BadgeAlert } from "lucide-react"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 
 type FormValues = z.infer<typeof facturaSchema>;
@@ -101,19 +101,19 @@ export function CrearFacturaForm({ clientes, productos, tiposCliente, deudas }: 
   const handleCreditCheck = () => {
     if (!selectedCliente || tipoPago !== 'Credito') return;
 
-    const tipoCliente = tiposCliente.find(tc => tc.id_tipcli === selectedCliente.tipo_cliente);
-    const creditLimit = tipoCliente?.monto_maximo ?? 0;
+    const tipoClienteData = tiposCliente.find(tc => tc.nombre.toLowerCase() === selectedCliente.nombre_tipo_cliente.toLowerCase());
 
-    if (creditLimit === 0) {
+    if (!tipoClienteData || tipoClienteData.monto_maximo === 0) {
         toast({
             title: "Verificación de Crédito",
-            description: "Este cliente no tiene un límite de crédito asignado.",
+            description: "Este cliente no tiene un límite de crédito asignado o es cero.",
             variant: "destructive",
         });
         setCreditCheckPassed(false);
         return;
     }
 
+    const creditLimit = tipoClienteData.monto_maximo;
     const currentDebt = deudas.find(d => d.id_cliente === selectedCliente.id_cliente)?.total_deuda || 0;
     const newTotalDebt = currentDebt + totalFactura;
     

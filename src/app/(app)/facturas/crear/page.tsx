@@ -23,8 +23,13 @@ async function getData(): Promise<{ clientes: Cliente[], productos: Producto[], 
         
         const clientes: Cliente[] = await clientesRes.json();
         const productosData: {productos: any[]} = await productosRes.json();
-        const tiposCliente: TipoCliente[] = await tiposClienteRes.json();
+        const tiposClienteData: any[] = await tiposClienteRes.json();
         
+        const tiposCliente: TipoCliente[] = tiposClienteData.map(tc => ({
+            ...tc,
+            monto_maximo: parseFloat(tc.monto_maximo)
+        }));
+
         let deudas: DeudaCliente[] = [];
         if (deudasRes.ok) {
             const deudasData: { id_cliente: number; total_deuda: number }[] = await deudasRes.json();
