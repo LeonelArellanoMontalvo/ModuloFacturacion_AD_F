@@ -41,7 +41,7 @@ export default function LoginPage() {
     startTransition(async () => {
       try {
         await login(values.usuario, values.contrasena);
-        router.push('/');
+        router.push('/dashboard');
       } catch (err: any) {
         setError(err.message || 'Ocurrió un error inesperado.');
       }
