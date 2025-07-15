@@ -28,12 +28,12 @@ export default function WelcomePage() {
           <CardDescription>Seleccione un método de acceso para continuar</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Link href="/auth/login" passHref legacyBehavior>
-            <Button className="w-full" size="lg">
+          <Button className="w-full" size="lg" asChild>
+            <Link href="/auth/login">
               <Lock className="mr-2 h-5 w-5" />
               Ingresar con Usuario
-            </Button>
-          </Link>
+            </Link>
+          </Button>
           <Button className="w-full" variant="secondary" size="lg" onClick={handleDirectAccess}>
             <LogIn className="mr-2 h-5 w-5" />
             Acceso Directo (Sin Restricciones)
