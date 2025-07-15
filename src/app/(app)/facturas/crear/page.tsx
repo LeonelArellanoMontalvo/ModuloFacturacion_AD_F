@@ -1,53 +1,64 @@
 import { PageHeader } from "@/components/page-header"
-import { Cliente, Producto } from "@/lib/types"
+import { Cliente, Producto, TipoCliente } from "@/lib/types"
 import { CrearFacturaForm } from "./form"
 import { Card, CardContent } from "@/components/ui/card"
 
-async function getData(): Promise<{ clientes: Cliente[], productos: Producto[] }> {
+interface DeudaCliente {
+    id_cliente: number;
+    total_deuda: number;
+}
+
+async function getData(): Promise<{ clientes: Cliente[], productos: Producto[], tiposCliente: TipoCliente[], deudas: DeudaCliente[] }> {
     try {
-        const [clientesRes, productosRes] = await Promise.all([
+        const [clientesRes, productosRes, tiposClienteRes, deudasRes] = await Promise.all([
             fetch('https://apdis-p5v5.vercel.app/api/clientes/', { cache: 'no-store' }),
-            fetch('https://ad-xglt.onrender.com/api/v1/productos', { cache: 'no-store' })
+            fetch('https://ad-xglt.onrender.com/api/v1/productos', { cache: 'no-store' }),
+            fetch('https://apdis-p5v5.vercel.app/api/tipo_clientes/', { cache: 'no-store' }),
+            // TODO: Replace with the actual debt API endpoint
+            fetch('https://apdis-p5v5.vercel.app/api/cuentas_por_cobrar/', { cache: 'no-store' })
         ]);
         
         if (!clientesRes.ok) throw new Error('Failed to fetch clientes');
         if (!productosRes.ok) throw new Error('Failed to fetch productos');
+        if (!tiposClienteRes.ok) throw new Error('Failed to fetch tipos de cliente');
+        if (!deudasRes.ok) throw new Error('Failed to fetch deudas');
         
         const clientes: Cliente[] = await clientesRes.json();
         const productosData: {productos: any[]} = await productosRes.json();
+        const tiposCliente: TipoCliente[] = await tiposClienteRes.json();
+        const deudas: DeudaCliente[] = await deudasRes.json();
 
-        // Transform products to match the internal Producto interface
+
         const productos: Producto[] = productosData.productos.map((p: any) => ({
             id_producto: p.id_producto,
             nombre: p.nombre,
             descripcion: p.descripcion,
-            precio: parseFloat(p.pvp), // Use pvp for price
-            stock_disponible: Number(p.stock_actual), // Use stock_actual for stock
+            precio: parseFloat(p.pvp),
+            stock_disponible: Number(p.stock_actual),
             estado: p.estado,
             graba_iva: p.graba_iva
         }));
         
         const activeClientes = clientes.filter(c => c.estado?.toLowerCase() === 'activo');
-        // Filter for active products
         const activeProductos = productos.filter(p => p.estado?.toUpperCase() === 'ACTIVO');
 
-        return { clientes: activeClientes, productos: activeProductos };
+        return { clientes: activeClientes, productos: activeProductos, tiposCliente, deudas };
     } catch (error) {
         console.error(error);
-        return { clientes: [], productos: [] };
+        return { clientes: [], productos: [], tiposCliente: [], deudas: [] };
     }
 }
 
 
 export default async function CrearFacturaPage() {
-    const { clientes, productos } = await getData();
+    const { clientes, productos, tiposCliente, deudas } = await getData();
 
     return (
         <>
             <PageHeader title="Crear Nueva Factura" />
             <Card>
                 <CardContent className="p-6">
-                    <CrearFacturaForm clientes={clientes} productos={productos} />
+                    <CrearFacturaForm clientes={clientes} productos={productos} tiposCliente={tiposCliente} deudas={deudas} />
                 </CardContent>
             </Card>
         </>

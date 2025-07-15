@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useMemo, useTransition, useState } from "react"
+import React, { useMemo, useTransition, useState, useEffect } from "react"
 import { useForm, useFieldArray, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -12,27 +12,42 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { createFactura } from "@/lib/actions"
 import { facturaSchema } from "@/lib/schemas"
-import type { Cliente, Producto } from "@/lib/types"
+import type { Cliente, Producto, TipoCliente } from "@/lib/types"
 import { useToast } from "@/hooks/use-toast"
-import { Trash2, Plus } from "lucide-react"
+import { Trash2, Plus, AlertTriangle } from "lucide-react"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 
 type FormValues = z.infer<typeof facturaSchema>;
 
+interface DeudaCliente {
+    id_cliente: number;
+    total_deuda: number;
+}
+
 interface CrearFacturaFormProps {
   clientes: Cliente[];
   productos: Producto[];
+  tiposCliente: TipoCliente[];
+  deudas: DeudaCliente[];
 }
 
-export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps) {
+export function CrearFacturaForm({ clientes, productos, tiposCliente, deudas }: CrearFacturaFormProps) {
   const [isPending, startTransition] = useTransition()
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const router = useRouter()
   const { toast } = useToast()
   const [productSearch, setProductSearch] = useState("");
   const [clientSearch, setClientSearch] = useState("");
+  const [creditStatus, setCreditStatus] = useState({
+      isCreditClient: false,
+      exceedsLimit: false,
+      limit: 0,
+      currentDebt: 0,
+      availableCredit: 0,
+  });
 
   const facturaSchemaWithStockValidation = useMemo(() => {
     return facturaSchema.superRefine((data, ctx) => {
@@ -72,9 +87,9 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
   });
 
   const selectedClientId = useWatch({ control: form.control, name: "header.id_cliente" });
-  const selectedCliente = useMemo(() => clientes.find(c => c.id_cliente === Number(selectedClientId)), [selectedClientId, clientes]);
-
   const detalles = useWatch({ control: form.control, name: 'detalles' });
+
+  const selectedCliente = useMemo(() => clientes.find(c => c.id_cliente === Number(selectedClientId)), [selectedClientId, clientes]);
 
   const totalFactura = useMemo(() => {
     return detalles.reduce((acc, detalle) => {
@@ -84,6 +99,36 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
         return acc + (cantidad * precio);
     }, 0);
   }, [detalles, productos]);
+
+  useEffect(() => {
+    if (!selectedCliente) {
+        setCreditStatus({ isCreditClient: false, exceedsLimit: false, limit: 0, currentDebt: 0, availableCredit: 0 });
+        return;
+    }
+
+    const tipoCliente = tiposCliente.find(tc => tc.id_tipcli === selectedCliente.tipo_cliente);
+    const isCreditClient = tipoCliente ? tipoCliente.monto_maximo > 0 : false;
+    
+    if (!isCreditClient) {
+        setCreditStatus({ isCreditClient: false, exceedsLimit: false, limit: 0, currentDebt: 0, availableCredit: 0 });
+        return;
+    }
+
+    const creditLimit = tipoCliente?.monto_maximo || 0;
+    const currentDebt = deudas.find(d => d.id_cliente === selectedCliente.id_cliente)?.total_deuda || 0;
+    const newTotalDebt = currentDebt + totalFactura;
+    const exceedsLimit = newTotalDebt > creditLimit;
+    const availableCredit = creditLimit - currentDebt;
+    
+    setCreditStatus({
+        isCreditClient: true,
+        exceedsLimit,
+        limit: creditLimit,
+        currentDebt,
+        availableCredit,
+    });
+
+  }, [selectedCliente, totalFactura, tiposCliente, deudas]);
 
   const onSubmit = (values: FormValues) => {
     startTransition(async () => {
@@ -120,6 +165,8 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
 
   const selectedProductIds = useMemo(() => detalles.map(d => Number(d.id_producto)), [detalles]);
 
+  const isSaveDisabled = isPending || creditStatus.exceedsLimit;
+
   return (
     <>
       <Form {...form}>
@@ -128,10 +175,34 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
               <Button type="button" variant="outline" onClick={() => setIsCancelDialogOpen(true)} disabled={isPending}>
                   Cancelar
               </Button>
-              <Button type="submit" disabled={isPending}>
+              <Button type="submit" disabled={isSaveDisabled}>
                 {isPending ? "Guardando Factura..." : "Guardar Factura"}
               </Button>
           </div>
+
+          {creditStatus.isCreditClient && (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Información de Crédito del Cliente</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                    <div className="grid grid-cols-3 gap-4 text-sm">
+                        <div><span className="font-semibold text-muted-foreground">Límite de Crédito:</span> <span className="font-bold">${creditStatus.limit.toFixed(2)}</span></div>
+                        <div><span className="font-semibold text-muted-foreground">Deuda Actual:</span> <span className="font-bold">${creditStatus.currentDebt.toFixed(2)}</span></div>
+                        <div><span className="font-semibold text-muted-foreground">Crédito Disponible:</span> <span className={`font-bold ${creditStatus.availableCredit < 0 ? 'text-destructive' : ''}`}>${creditStatus.availableCredit.toFixed(2)}</span></div>
+                    </div>
+                    {creditStatus.exceedsLimit && (
+                        <Alert variant="destructive" className="mt-4">
+                            <AlertTriangle className="h-4 w-4" />
+                            <AlertTitle>Límite de Crédito Excedido</AlertTitle>
+                            <AlertDescription>
+                                El monto de esta factura (${totalFactura.toFixed(2)}) sumado a la deuda actual del cliente excede su límite de crédito. No se puede guardar la factura.
+                            </AlertDescription>
+                        </Alert>
+                    )}
+                </CardContent>
+            </Card>
+          )}
 
           {/* Invoice Header */}
           <Card>
