@@ -232,7 +232,7 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
                               <Select onValueChange={field.onChange} defaultValue={field.value}>
                                   <FormControl><SelectTrigger><SelectValue placeholder="Seleccione un estado" /></SelectTrigger></FormControl>
                                   <SelectContent>
-                                      <SelectItem value="Pagada">Pagada</SelectItem>
+                                      <SelectItem value="Pagado">Pagado</SelectItem>
                                       <SelectItem value="Pendiente">Pendiente</SelectItem>
                                   </SelectContent>
                               </Select>
