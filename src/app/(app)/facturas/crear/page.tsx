@@ -14,8 +14,7 @@ async function getData(): Promise<{ clientes: Cliente[], productos: Producto[], 
             fetch('https://apdis-p5v5.vercel.app/api/clientes/', { cache: 'no-store' }),
             fetch('https://ad-xglt.onrender.com/api/v1/productos', { cache: 'no-store' }),
             fetch('https://apdis-p5v5.vercel.app/api/tipo_clientes/', { cache: 'no-store' }),
-            // TODO: Replace with the actual debt API endpoint
-            fetch('https://apdis-p5v5.vercel.app/api/cuentas_por_cobrar/', { cache: 'no-store' })
+            fetch('https://module-cuentasporcobrar-api.onrender.com/api/clientes/deudores', { cache: 'no-store' })
         ]);
         
         if (!clientesRes.ok) throw new Error('Failed to fetch clientes');
@@ -26,7 +25,8 @@ async function getData(): Promise<{ clientes: Cliente[], productos: Producto[], 
         const clientes: Cliente[] = await clientesRes.json();
         const productosData: {productos: any[]} = await productosRes.json();
         const tiposCliente: TipoCliente[] = await tiposClienteRes.json();
-        const deudas: DeudaCliente[] = await deudasRes.json();
+        const deudasData: { deudores: DeudaCliente[] } = await deudasRes.json();
+        const deudas = deudasData.deudores || [];
 
 
         const productos: Producto[] = productosData.productos.map((p: any) => ({
