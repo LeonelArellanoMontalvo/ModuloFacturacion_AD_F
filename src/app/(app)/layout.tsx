@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useEffect } from "react";
@@ -27,7 +28,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     }
   }, [user, loading, isDirectAccess, router]);
 
-  if (loading && !isDirectAccess) {
+  if (loading) {
     return (
         <div className="flex h-screen items-center justify-center">
             <p>Verificando credenciales...</p>

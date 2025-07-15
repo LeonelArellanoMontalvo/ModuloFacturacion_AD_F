@@ -1,3 +1,4 @@
+
 "use client"
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -12,7 +13,7 @@ export default function WelcomePage() {
 
     const handleDirectAccess = () => {
         setDirectAccess();
-        router.push('/');
+        router.push('/dashboard');
     }
 
   return (
