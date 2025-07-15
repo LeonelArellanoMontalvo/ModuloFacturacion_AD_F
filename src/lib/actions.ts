@@ -1,3 +1,4 @@
+
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -174,7 +175,7 @@ export async function createFactura(formData: z.infer<typeof facturaSchema>) {
     const newFactura = await apiCall('/facturas/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...header, monto_total: 0 }),
+      body: JSON.stringify({ ...header, monto_total: 0 }), // monto_total is calculated in the backend
     });
 
     if (!newFactura || !newFactura.id_factura) {

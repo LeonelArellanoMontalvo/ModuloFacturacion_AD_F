@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo, useTransition, useCallback } from "react";
@@ -178,7 +179,7 @@ export function FacturasClient({ data, clientes }: FacturasClientProps) {
                                 <TableCell>{d.nombre || 'N/A'}</TableCell>
                                 <TableCell>{d.cantidad}</TableCell>
                                 <TableCell className="text-right">${(parseFloat(d.precio_unitario) || 0).toFixed(2)}</TableCell>
-                                <TableCell className="text-right">${(parseFloat(d.subtotal) || 0).toFixed(2)}</TableCell>
+                                <TableCell className="text-right">${(parseFloat(d.total_producto) || 0).toFixed(2)}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>

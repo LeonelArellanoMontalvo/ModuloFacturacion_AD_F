@@ -1,3 +1,4 @@
+
 export interface TipoCliente {
   id_tipcli: number;
   nombre: string;
@@ -38,11 +39,13 @@ export interface DetalleFactura {
   id_detalle_factura: number;
   id_factura: number;
   id_producto: number;
+  nombre: string;
   cantidad: number;
   precio_unitario: string;
-  subtotal: string;
-  nombre: string;
+  total_producto: string;
+  cantidadDisponible: number;
 }
+
 
 export interface Producto {
   id_producto: number;

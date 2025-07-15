@@ -1,3 +1,4 @@
+
 import { PageHeader } from "@/components/page-header";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -140,7 +141,7 @@ export default async function ImprimirFacturaPage({ params }: { params: { id: st
                                             <TableCell>{item.nombre}</TableCell>
                                             <TableCell className="text-center">{item.cantidad}</TableCell>
                                             <TableCell className="text-right">${parseFloat(item.precio_unitario).toFixed(2)}</TableCell>
-                                            <TableCell className="text-right">${parseFloat(item.subtotal).toFixed(2)}</TableCell>
+                                            <TableCell className="text-right">${parseFloat(item.total_producto).toFixed(2)}</TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
