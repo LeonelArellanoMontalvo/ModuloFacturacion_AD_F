@@ -8,6 +8,7 @@ import { Cliente, DetalleFactura, Factura } from "@/lib/types";
 import { AlertTriangle, FileText } from "lucide-react";
 import { format } from 'date-fns';
 import { PrintControls } from "./print-controls";
+import { UpdateTitle } from "./update-title";
 
 interface DetalleResponse {
     id_factura: number;
@@ -69,14 +70,20 @@ export default async function ImprimirFacturaPage({ params }: { params: { id: st
     const formatDate = (dateString: string) => {
         try {
             if (!dateString || !dateString.includes('T')) return "Fecha inválida";
-            return format(new Date(dateString), 'dd/MM/yyyy');
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return "Fecha inválida";
+            return format(date, 'dd/MM/yyyy');
         } catch {
             return "Fecha inválida";
         }
     };
     
+    const formattedDate = formatDate(factura.fecha_factura);
+    const fileName = `${factura.numero_factura} - ${cliente.nombre} ${cliente.apellido} - ${formattedDate.replace(/\//g, '-')}`;
+
     return (
         <>
+            <UpdateTitle title={fileName} />
             <PageHeader 
                 title={`Factura ${factura.numero_factura}`} 
                 className="no-print"
@@ -95,7 +102,7 @@ export default async function ImprimirFacturaPage({ params }: { params: { id: st
                                     </div>
                                 </div>
                                 <div className="mt-4 text-sm text-muted-foreground">
-                                    <p><span className="font-semibold">Fecha de Emisión:</span> {formatDate(factura.fecha_factura)}</p>
+                                    <p><span className="font-semibold">Fecha de Emisión:</span> {formattedDate}</p>
                                     <p><span className="font-semibold">Estado:</span> <span className="font-bold capitalize">{factura.estado_factura}</span></p>
                                     <p><span className="font-semibold">Método de Pago:</span> {factura.tipo_pago}</p>
                                 </div>
