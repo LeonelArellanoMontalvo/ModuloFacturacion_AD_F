@@ -263,12 +263,12 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
                       const subtotal = (producto?.precio || 0) * (detalles[index]?.cantidad || 0);
 
                       return (
-                          <div key={field.id} className="flex flex-wrap md:flex-nowrap items-start gap-4 p-4 border rounded-lg relative">
+                          <div key={field.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 border rounded-lg relative">
                               <FormField
                                   control={form.control}
                                   name={`detalles.${index}.id_producto`}
                                   render={({ field }) => (
-                                      <FormItem className="flex-1 min-w-[200px]">
+                                      <FormItem className="md:col-span-3">
                                           <FormLabel>Producto</FormLabel>
                                           <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
                                               <FormControl><SelectTrigger><SelectValue placeholder="Seleccione un producto" /></SelectTrigger></FormControl>
@@ -300,24 +300,28 @@ export function CrearFacturaForm({ clientes, productos }: CrearFacturaFormProps)
                                   control={form.control}
                                   name={`detalles.${index}.cantidad`}
                                   render={({ field }) => (
-                                      <FormItem className="w-full md:w-24">
+                                      <FormItem className="md:col-span-2">
                                           <FormLabel>Cantidad</FormLabel>
                                           <FormControl><Input type="number" min="1" {...field} /></FormControl>
                                           <FormMessage />
                                       </FormItem>
                                   )}
                               />
-                              <FormItem className="w-full md:w-24">
+                              <FormItem className="md:col-span-2">
                                   <FormLabel>Stock Disp.</FormLabel>
                                   <Input value={producto?.stock_disponible ?? 'N/A'} readOnly className="bg-muted"/>
                               </FormItem>
-                              <FormItem className="w-full md:w-32">
-                                  <FormLabel>Precio Unit.</FormLabel>
-                                  <Input value={`$${(producto?.precio || 0).toFixed(2)}`} readOnly className="bg-muted"/>
+                              <FormItem className="md:col-span-1">
+                                  <FormLabel>Graba IVA</FormLabel>
+                                  <Input value={producto ? (producto.graba_iva ? 'Sí' : 'No') : 'N/A'} readOnly className="bg-muted text-center" />
                               </FormItem>
-                              <FormItem className="w-full md:w-32">
+                              <FormItem className="md:col-span-2">
+                                  <FormLabel>Precio Unit.</FormLabel>
+                                  <Input value={`$${(producto?.precio || 0).toFixed(2)}`} readOnly className="bg-muted text-right"/>
+                              </FormItem>
+                              <FormItem className="md:col-span-2">
                                   <FormLabel>Subtotal</FormLabel>
-                                  <Input value={`$${subtotal.toFixed(2)}`} readOnly className="bg-muted" />
+                                  <Input value={`$${subtotal.toFixed(2)}`} readOnly className="bg-muted text-right" />
                               </FormItem>
                               <Button type="button" variant="ghost" size="icon" className="text-destructive absolute top-1 right-1" onClick={() => remove(index)} disabled={fields.length <= 1}>
                                   <Trash2 className="h-4 w-4"/>

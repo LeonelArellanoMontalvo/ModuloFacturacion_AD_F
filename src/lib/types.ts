@@ -53,4 +53,6 @@ export interface Producto {
   descripcion: string;
   precio: number;
   stock_disponible: number;
+  estado?: string;
+  graba_iva?: boolean;
 }
