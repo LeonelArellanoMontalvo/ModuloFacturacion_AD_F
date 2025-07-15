@@ -12,12 +12,11 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { createFactura } from "@/lib/actions"
 import { facturaSchema } from "@/lib/schemas"
 import type { Cliente, Producto, TipoCliente } from "@/lib/types"
 import { useToast } from "@/hooks/use-toast"
-import { Trash2, Plus, AlertTriangle } from "lucide-react"
+import { Trash2, Plus, AlertTriangle, BadgeCheck, BadgeAlert } from "lucide-react"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 
 type FormValues = z.infer<typeof facturaSchema>;
@@ -41,13 +40,7 @@ export function CrearFacturaForm({ clientes, productos, tiposCliente, deudas }: 
   const { toast } = useToast()
   const [productSearch, setProductSearch] = useState("");
   const [clientSearch, setClientSearch] = useState("");
-  const [creditStatus, setCreditStatus] = useState({
-      isCreditClient: false,
-      exceedsLimit: false,
-      limit: 0,
-      currentDebt: 0,
-      availableCredit: 0,
-  });
+  const [creditCheckPassed, setCreditCheckPassed] = useState<boolean | null>(null);
 
   const facturaSchemaWithStockValidation = useMemo(() => {
     return facturaSchema.superRefine((data, ctx) => {
@@ -75,7 +68,7 @@ export function CrearFacturaForm({ clientes, productos, tiposCliente, deudas }: 
       header: {
         id_cliente: undefined,
         tipo_pago: "Efectivo",
-        estado_factura: "Pendiente",
+        estado_factura: "Pagado",
       },
       detalles: [{ id_producto: undefined, cantidad: 1 }],
     },
@@ -88,6 +81,7 @@ export function CrearFacturaForm({ clientes, productos, tiposCliente, deudas }: 
 
   const selectedClientId = useWatch({ control: form.control, name: "header.id_cliente" });
   const detalles = useWatch({ control: form.control, name: 'detalles' });
+  const tipoPago = useWatch({ control: form.control, name: 'header.tipo_pago' });
 
   const selectedCliente = useMemo(() => clientes.find(c => c.id_cliente === Number(selectedClientId)), [selectedClientId, clientes]);
 
@@ -101,34 +95,45 @@ export function CrearFacturaForm({ clientes, productos, tiposCliente, deudas }: 
   }, [detalles, productos]);
 
   useEffect(() => {
-    if (!selectedCliente) {
-        setCreditStatus({ isCreditClient: false, exceedsLimit: false, limit: 0, currentDebt: 0, availableCredit: 0 });
-        return;
-    }
+    setCreditCheckPassed(null);
+  }, [selectedClientId, totalFactura, tipoPago]);
+
+  const handleCreditCheck = () => {
+    if (!selectedCliente || tipoPago !== 'Credito') return;
 
     const tipoCliente = tiposCliente.find(tc => tc.id_tipcli === selectedCliente.tipo_cliente);
-    const isCreditClient = tipoCliente ? tipoCliente.monto_maximo > 0 : false;
-    
-    if (!isCreditClient) {
-        setCreditStatus({ isCreditClient: false, exceedsLimit: false, limit: 0, currentDebt: 0, availableCredit: 0 });
+    const creditLimit = tipoCliente?.monto_maximo ?? 0;
+
+    if (creditLimit === 0) {
+        toast({
+            title: "Verificación de Crédito",
+            description: "Este cliente no tiene un límite de crédito asignado.",
+            variant: "destructive",
+        });
+        setCreditCheckPassed(false);
         return;
     }
 
-    const creditLimit = tipoCliente?.monto_maximo || 0;
     const currentDebt = deudas.find(d => d.id_cliente === selectedCliente.id_cliente)?.total_deuda || 0;
     const newTotalDebt = currentDebt + totalFactura;
-    const exceedsLimit = newTotalDebt > creditLimit;
-    const availableCredit = creditLimit - currentDebt;
     
-    setCreditStatus({
-        isCreditClient: true,
-        exceedsLimit,
-        limit: creditLimit,
-        currentDebt,
-        availableCredit,
-    });
+    if (newTotalDebt <= creditLimit) {
+        toast({
+            title: "Crédito Aprobado",
+            description: "El cliente aún tiene crédito disponible.",
+            className: "bg-green-100 dark:bg-green-900",
+        });
+        setCreditCheckPassed(true);
+    } else {
+        toast({
+            title: "Límite de Crédito Excedido",
+            description: `Deuda actual ($${currentDebt.toFixed(2)}) + esta factura ($${totalFactura.toFixed(2)}) excede el límite ($${creditLimit.toFixed(2)}).`,
+            variant: "destructive",
+        });
+        setCreditCheckPassed(false);
+    }
+  };
 
-  }, [selectedCliente, totalFactura, tiposCliente, deudas]);
 
   const onSubmit = (values: FormValues) => {
     startTransition(async () => {
@@ -165,7 +170,9 @@ export function CrearFacturaForm({ clientes, productos, tiposCliente, deudas }: 
 
   const selectedProductIds = useMemo(() => detalles.map(d => Number(d.id_producto)), [detalles]);
 
-  const isSaveDisabled = isPending || creditStatus.exceedsLimit;
+  const isCreditPayment = tipoPago === 'Credito';
+  const isSaveDisabled = isPending || (isCreditPayment && !creditCheckPassed);
+  const isCreditCheckDisabled = !isCreditPayment || !selectedClientId || totalFactura === 0;
 
   return (
     <>
@@ -179,32 +186,7 @@ export function CrearFacturaForm({ clientes, productos, tiposCliente, deudas }: 
                 {isPending ? "Guardando Factura..." : "Guardar Factura"}
               </Button>
           </div>
-
-          {creditStatus.isCreditClient && (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Información de Crédito del Cliente</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                    <div className="grid grid-cols-3 gap-4 text-sm">
-                        <div><span className="font-semibold text-muted-foreground">Límite de Crédito:</span> <span className="font-bold">${creditStatus.limit.toFixed(2)}</span></div>
-                        <div><span className="font-semibold text-muted-foreground">Deuda Actual:</span> <span className="font-bold">${creditStatus.currentDebt.toFixed(2)}</span></div>
-                        <div><span className="font-semibold text-muted-foreground">Crédito Disponible:</span> <span className={`font-bold ${creditStatus.availableCredit < 0 ? 'text-destructive' : ''}`}>${creditStatus.availableCredit.toFixed(2)}</span></div>
-                    </div>
-                    {creditStatus.exceedsLimit && (
-                        <Alert variant="destructive" className="mt-4">
-                            <AlertTriangle className="h-4 w-4" />
-                            <AlertTitle>Límite de Crédito Excedido</AlertTitle>
-                            <AlertDescription>
-                                El monto de esta factura (${totalFactura.toFixed(2)}) sumado a la deuda actual del cliente excede su límite de crédito. No se puede guardar la factura.
-                            </AlertDescription>
-                        </Alert>
-                    )}
-                </CardContent>
-            </Card>
-          )}
-
-          {/* Invoice Header */}
+          
           <Card>
             <CardHeader>
               <CardTitle>Datos de la Factura</CardTitle>
@@ -317,7 +299,6 @@ export function CrearFacturaForm({ clientes, productos, tiposCliente, deudas }: 
 
           <Separator />
 
-          {/* Invoice Details */}
           <Card>
               <CardHeader>
                   <CardTitle>Detalles de la Factura</CardTitle>
@@ -403,9 +384,15 @@ export function CrearFacturaForm({ clientes, productos, tiposCliente, deudas }: 
               </CardContent>
           </Card>
           
-          <div className="flex justify-end items-center gap-6 p-4 border rounded-lg">
-              <div className="text-xl font-bold">Total Factura:</div>
-              <div className="text-2xl font-bold text-primary">${totalFactura.toFixed(2)}</div>
+          <div className="flex flex-col items-end gap-4 p-4 border rounded-lg">
+            <div className="flex items-center gap-4">
+                <Button type="button" variant="outline" onClick={handleCreditCheck} disabled={isCreditCheckDisabled}>
+                    <BadgeAlert className="mr-2 h-4 w-4" />
+                    Verificar Crédito
+                </Button>
+                <div className="text-xl font-bold">Total Factura:</div>
+                <div className="text-2xl font-bold text-primary">${totalFactura.toFixed(2)}</div>
+            </div>
           </div>
         </form>
       </Form>

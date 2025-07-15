@@ -20,14 +20,18 @@ async function getData(): Promise<{ clientes: Cliente[], productos: Producto[], 
         if (!clientesRes.ok) throw new Error('Failed to fetch clientes');
         if (!productosRes.ok) throw new Error('Failed to fetch productos');
         if (!tiposClienteRes.ok) throw new Error('Failed to fetch tipos de cliente');
-        if (!deudasRes.ok) throw new Error('Failed to fetch deudas');
         
         const clientes: Cliente[] = await clientesRes.json();
         const productosData: {productos: any[]} = await productosRes.json();
         const tiposCliente: TipoCliente[] = await tiposClienteRes.json();
-        const deudasData: { deudores: DeudaCliente[] } = await deudasRes.json();
-        const deudas = deudasData.deudores || [];
-
+        
+        let deudas: DeudaCliente[] = [];
+        if (deudasRes.ok) {
+            const deudasData: { id_cliente: number; total_deuda: number }[] = await deudasRes.json();
+            deudas = deudasData || [];
+        } else {
+            console.warn("Could not fetch debt data, assuming zero debt for all clients.");
+        }
 
         const productos: Producto[] = productosData.productos.map((p: any) => ({
             id_producto: p.id_producto,
@@ -40,7 +44,7 @@ async function getData(): Promise<{ clientes: Cliente[], productos: Producto[], 
         }));
         
         const activeClientes = clientes.filter(c => c.estado?.toLowerCase() === 'activo');
-        const activeProductos = productos.filter(p => p.estado?.toUpperCase() === 'ACTIVO');
+        const activeProductos = productos.filter(p => p.estado?.toUpperCase() === 'ACTIVO' && p.stock_disponible > 0);
 
         return { clientes: activeClientes, productos: activeProductos, tiposCliente, deudas };
     } catch (error) {
