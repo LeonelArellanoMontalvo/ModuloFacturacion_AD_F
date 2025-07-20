@@ -34,7 +34,7 @@ interface CrearFacturaFormProps {
   deudas: DeudaCliente[];
 }
 
-const IVA_RATE = 0.12;
+const IVA_RATE = 0.15;
 
 export function CrearFacturaForm({ clientes, productos, tiposCliente, deudas }: CrearFacturaFormProps) {
   const [isPending, startTransition] = useTransition()

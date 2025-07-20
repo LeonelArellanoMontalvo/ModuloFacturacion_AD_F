@@ -15,7 +15,7 @@ interface DetalleResponse {
     detalles: DetalleFactura[];
 }
 
-const IVA_RATE = 0.12;
+const IVA_RATE = 0.15;
 
 async function getData(id: string): Promise<{ factura: Factura | null; cliente: Cliente | null; detalles: DetalleFactura[]; productos: Producto[] }> {
     try {
