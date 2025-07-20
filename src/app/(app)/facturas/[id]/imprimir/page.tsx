@@ -4,7 +4,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Cliente, DetalleFactura, Factura } from "@/lib/types";
+import { Cliente, DetalleFactura, Factura, Producto } from "@/lib/types";
 import { AlertTriangle, FileText } from "lucide-react";
 import { format } from 'date-fns';
 import { PrintControls } from "./print-controls";
@@ -15,15 +15,18 @@ interface DetalleResponse {
     detalles: DetalleFactura[];
 }
 
-async function getData(id: string): Promise<{ factura: Factura | null; cliente: Cliente | null; detalles: DetalleFactura[] }> {
+const IVA_RATE = 0.12;
+
+async function getData(id: string): Promise<{ factura: Factura | null; cliente: Cliente | null; detalles: DetalleFactura[]; productos: Producto[] }> {
     try {
         const facturaId = parseInt(id, 10);
         if (isNaN(facturaId)) throw new Error("ID de factura inválido");
 
-        const [facturaRes, detallesRes, clientesRes] = await Promise.all([
+        const [facturaRes, detallesRes, clientesRes, productosRes] = await Promise.all([
             fetch(`https://apdis-p5v5.vercel.app/api/facturas/${facturaId}/`, { cache: 'no-store' }),
             fetch(`https://apdis-p5v5.vercel.app/api/detalle_facturas/`, { cache: 'no-store' }),
-            fetch(`https://apdis-p5v5.vercel.app/api/clientes/`, { cache: 'no-store' })
+            fetch(`https://apdis-p5v5.vercel.app/api/clientes/`, { cache: 'no-store' }),
+            fetch('https://ad-xglt.onrender.com/api/v1/productos', { cache: 'no-store' }),
         ]);
 
         if (!facturaRes.ok) throw new Error('No se pudo obtener la factura');
@@ -41,17 +44,29 @@ async function getData(id: string): Promise<{ factura: Factura | null; cliente: 
         const clientes: Cliente[] = await clientesRes.json();
         const cliente = clientes.find(c => c.id_cliente === factura.id_cliente) || null;
 
-        return { factura, cliente, detalles };
+        if (!productosRes.ok) throw new Error('Failed to fetch productos');
+        const productosData: {productos: any[]} = await productosRes.json();
+        const productos: Producto[] = productosData.productos.map((p: any) => ({
+            id_producto: p.id_producto,
+            nombre: p.nombre,
+            descripcion: p.descripcion,
+            precio: parseFloat(p.pvp),
+            stock_disponible: Number(p.stock_actual),
+            estado: p.estado,
+            graba_iva: p.graba_iva,
+        }));
+
+        return { factura, cliente, detalles, productos };
 
     } catch (error) {
         console.error("Error al obtener datos de la factura para imprimir:", error);
-        return { factura: null, cliente: null, detalles: [] };
+        return { factura: null, cliente: null, detalles: [], productos: [] };
     }
 }
 
 
 export default async function ImprimirFacturaPage({ params }: { params: { id: string } }) {
-    const { factura, cliente, detalles } = await getData(params.id);
+    const { factura, cliente, detalles, productos } = await getData(params.id);
 
     if (!factura || !cliente) {
         return (
@@ -77,6 +92,25 @@ export default async function ImprimirFacturaPage({ params }: { params: { id: st
             return "Fecha inválida";
         }
     };
+
+    let subtotalSinIva = 0;
+    let totalIva = 0;
+
+    detalles.forEach(item => {
+        const producto = productos.find(p => p.id_producto === item.id_producto);
+        const precioUnitario = parseFloat(item.precio_unitario);
+        const cantidad = item.cantidad;
+        const totalProducto = precioUnitario * cantidad;
+
+        if (producto?.graba_iva) {
+            subtotalSinIva += totalProducto;
+            totalIva += totalProducto * IVA_RATE;
+        } else {
+            subtotalSinIva += totalProducto;
+        }
+    });
+
+    const montoTotalCalculado = subtotalSinIva + totalIva;
     
     const formattedDate = formatDate(factura.fecha_factura);
     const fileName = `${factura.numero_factura} - ${cliente.nombre} ${cliente.apellido} - ${formattedDate.replace(/\//g, '-')}`;
@@ -161,11 +195,11 @@ export default async function ImprimirFacturaPage({ params }: { params: { id: st
                             <div className="w-full max-w-sm space-y-2 text-right">
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">Subtotal:</span>
-                                    <span>${factura.monto_total.toFixed(2)}</span>
+                                    <span>${subtotalSinIva.toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span className="text-muted-foreground">IVA (12%):</span>
-                                    <span>$0.00</span>
+                                    <span className="text-muted-foreground">IVA ({IVA_RATE * 100}%):</span>
+                                    <span>${totalIva.toFixed(2)}</span>
                                 </div>
                                 <Separator />
                                 <div className="flex justify-between font-bold text-lg text-primary">
@@ -180,3 +214,5 @@ export default async function ImprimirFacturaPage({ params }: { params: { id: st
         </>
     );
 }
+
+    

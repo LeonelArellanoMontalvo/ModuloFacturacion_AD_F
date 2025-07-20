@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useTransition, useState, useEffect } from "react"
@@ -32,6 +33,8 @@ interface CrearFacturaFormProps {
   tiposCliente: TipoCliente[];
   deudas: DeudaCliente[];
 }
+
+const IVA_RATE = 0.12;
 
 export function CrearFacturaForm({ clientes, productos, tiposCliente, deudas }: CrearFacturaFormProps) {
   const [isPending, startTransition] = useTransition()
@@ -90,9 +93,12 @@ export function CrearFacturaForm({ clientes, productos, tiposCliente, deudas }: 
         const producto = productos.find(p => p.id_producto === Number(detalle.id_producto));
         const cantidad = Number(detalle.cantidad) || 0;
         const precio = producto?.precio || 0;
-        return acc + (cantidad * precio);
+        const subtotal = cantidad * precio;
+        const iva = producto?.graba_iva ? subtotal * IVA_RATE : 0;
+        return acc + subtotal + iva;
     }, 0);
   }, [detalles, productos]);
+
 
   useEffect(() => {
     setCreditCheckPassed(null);
@@ -308,7 +314,11 @@ export function CrearFacturaForm({ clientes, productos, tiposCliente, deudas }: 
                   {fields.map((field, index) => {
                       const selectedProductoId = detalles[index]?.id_producto;
                       const producto = productos.find(p => p.id_producto === Number(selectedProductoId));
-                      const subtotal = (producto?.precio || 0) * (detalles[index]?.cantidad || 0);
+                      const cantidad = detalles[index]?.cantidad || 0;
+                      const precio_unitario = producto?.precio || 0;
+                      const subtotal_base = precio_unitario * cantidad;
+                      const iva = producto?.graba_iva ? subtotal_base * IVA_RATE : 0;
+                      const subtotal_con_iva = subtotal_base + iva;
 
                       return (
                           <div key={field.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 border rounded-lg relative">
@@ -369,7 +379,7 @@ export function CrearFacturaForm({ clientes, productos, tiposCliente, deudas }: 
                               </FormItem>
                               <FormItem className="md:col-span-2">
                                   <FormLabel>Subtotal</FormLabel>
-                                  <Input value={`$${subtotal.toFixed(2)}`} readOnly className="bg-muted text-right" />
+                                  <Input value={`$${subtotal_con_iva.toFixed(2)}`} readOnly className="bg-muted text-right" />
                               </FormItem>
                               <Button type="button" variant="ghost" size="icon" className="text-destructive absolute top-1 right-1" onClick={() => remove(index)} disabled={fields.length <= 1}>
                                   <Trash2 className="h-4 w-4"/>
@@ -415,3 +425,5 @@ export function CrearFacturaForm({ clientes, productos, tiposCliente, deudas }: 
     </>
   )
 }
+
+    
