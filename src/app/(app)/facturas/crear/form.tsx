@@ -86,6 +86,15 @@ export function CrearFacturaForm({ clientes, productos, tiposCliente, deudas }: 
   const detalles = useWatch({ control: form.control, name: 'detalles' });
   const tipoPago = useWatch({ control: form.control, name: 'header.tipo_pago' });
 
+  useEffect(() => {
+    if (tipoPago === 'Credito') {
+        form.setValue('header.estado_factura', 'Pendiente');
+    } else {
+        form.setValue('header.estado_factura', 'Pagado');
+    }
+  }, [tipoPago, form]);
+
+
   const selectedCliente = useMemo(() => clientes.find(c => c.id_cliente === Number(selectedClientId)), [selectedClientId, clientes]);
 
   const totalFactura = useMemo(() => {
@@ -288,13 +297,9 @@ export function CrearFacturaForm({ clientes, productos, tiposCliente, deudas }: 
                       render={({ field }) => (
                           <FormItem>
                               <FormLabel>Estado de la Factura</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                  <FormControl><SelectTrigger><SelectValue placeholder="Seleccione un estado" /></SelectTrigger></FormControl>
-                                  <SelectContent>
-                                      <SelectItem value="Pagado">Pagado</SelectItem>
-                                      <SelectItem value="Pendiente">Pendiente</SelectItem>
-                                  </SelectContent>
-                              </Select>
+                                <FormControl>
+                                  <Input {...field} readOnly className="bg-muted" />
+                                </FormControl>
                               <FormMessage />
                           </FormItem>
                       )}
@@ -427,3 +432,5 @@ export function CrearFacturaForm({ clientes, productos, tiposCliente, deudas }: 
     </>
   )
 }
+
+    
