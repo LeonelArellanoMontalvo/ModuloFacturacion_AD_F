@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useMemo, useTransition, useCallback } from "react";
+import React, { useState, useMemo, useTransition, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Factura, Cliente, DetalleFactura } from "@/lib/types";
@@ -16,7 +16,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { deleteFactura } from "@/lib/actions";
+import { deleteFactura, updateFacturaStatusBatch } from "@/lib/actions";
 import { useToast } from "@/hooks/use-toast";
 import {
     AlertDialog,
@@ -61,20 +61,48 @@ async function getDetalles(facturaId: number): Promise<DetalleFactura[]> {
 interface FacturasClientProps {
   data: Factura[];
   clientes: Cliente[];
+  facturasToUpdate: number[];
 }
 
-export function FacturasClient({ data, clientes }: FacturasClientProps) {
+export function FacturasClient({ data, clientes, facturasToUpdate }: FacturasClientProps) {
   const router = useRouter();
   const { toast } = useToast();
   const { hasPermission } = useAuth();
 
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isDeleting, startDeleting] = useTransition();
+  const [isUpdating, startUpdating] = useTransition();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [facturaToDelete, setFacturaToDelete] = useState<number | null>(null);
   const [selectedFactura, setSelectedFactura] = useState<Factura | null>(null);
   const [detalles, setDetalles] = useState<DetalleFactura[]>([]);
   const [isLoadingDetalles, startLoadingDetalles] = useTransition();
+
+  useEffect(() => {
+    if (facturasToUpdate.length > 0) {
+      startUpdating(async () => {
+        console.log(`Client: Triggering update for ${facturasToUpdate.length} facturas.`);
+        const result = await updateFacturaStatusBatch(facturasToUpdate);
+        if (result.error) {
+           toast({
+            title: "Error al sincronizar",
+            description: "No se pudieron actualizar los estados de algunas facturas pagadas.",
+            variant: "destructive",
+          });
+        }
+        if (result.success) {
+           toast({
+            title: "Sincronización completa",
+            description: `${result.updatedCount} facturas se actualizaron a 'Pagado'.`,
+          });
+          // No need to re-fetch, data is already updated optimistically on the server render
+          // router.refresh() will re-run the server component's getData function
+          router.refresh();
+        }
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [facturasToUpdate, toast]);
 
   const noClientes = clientes.length === 0;
   const canCreate = hasPermission('Facturas', 'C');
@@ -144,9 +172,9 @@ export function FacturasClient({ data, clientes }: FacturasClientProps) {
         toolbar={
           canCreate ? (
             <Link href="/facturas/crear" passHref>
-              <Button disabled={noClientes}>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Crear Factura
+              <Button disabled={noClientes || isUpdating}>
+                {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isUpdating ? "Sincronizando..." : "Crear Factura"}
               </Button>
             </Link>
           ) : null

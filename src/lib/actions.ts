@@ -214,21 +214,53 @@ export async function deleteFactura(id: number) {
   }
 }
 
-export async function updateFacturaStatus(id: number, facturaData: any) {
-  const payload = {
-    ...facturaData,
-    estado_factura: 'Pagado',
-  };
-  try {
-    await apiCall(`/facturas/${id}/`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    revalidatePath('/facturas');
-    return { success: true };
-  } catch (error) {
-    console.error(`Error updating factura ${id} status:`, error);
-    return { error: "No se pudo actualizar el estado de la factura." };
+export async function updateFacturaStatusBatch(facturaIds: number[]) {
+  if (facturaIds.length === 0) {
+    return { success: true, updatedCount: 0 };
   }
+
+  // Since we don't have a true batch update endpoint,
+  // we'll have to fetch, modify, and PUT each one.
+  // This is inefficient but necessary with the current API.
+  let updatedCount = 0;
+  let hasErrors = false;
+
+  for (const id of facturaIds) {
+    try {
+      // 1. Fetch the existing factura data
+      const factura = await apiCall(`/facturas/${id}/`, { method: 'GET' });
+      
+      if (factura) {
+        // 2. Prepare the payload for update
+        const { cliente, detalles, ...facturaPayload } = factura;
+        const payload = {
+          ...facturaPayload,
+          estado_factura: 'Pagado',
+        };
+        
+        // 3. Send the PUT request
+        await apiCall(`/facturas/${id}/`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        updatedCount++;
+      }
+    } catch (error) {
+      console.error(`Failed to update status for factura ${id}:`, error);
+      hasErrors = true;
+      // Continue to the next one
+    }
+  }
+
+  // Revalidate the path only once after all updates are attempted.
+  if (updatedCount > 0) {
+    revalidatePath('/facturas');
+  }
+
+  if (hasErrors) {
+     return { error: "Algunas facturas no pudieron ser actualizadas.", updatedCount };
+  }
+
+  return { success: true, updatedCount };
 }
