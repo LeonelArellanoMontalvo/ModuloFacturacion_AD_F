@@ -197,6 +197,12 @@ export function CrearFacturaForm({ clientes, productos, tiposCliente, deudas }: 
               <Button type="button" variant="outline" onClick={() => setIsCancelDialogOpen(true)} disabled={isPending}>
                   Cancelar
               </Button>
+              {isCreditPayment && (
+                  <Button type="button" variant="outline" onClick={handleCreditCheck} disabled={isCreditCheckDisabled}>
+                      <BadgeAlert className="mr-2 h-4 w-4" />
+                      Verificar Crédito
+                  </Button>
+              )}
               <Button type="submit" disabled={isSaveDisabled}>
                 {isPending ? "Guardando Factura..." : "Guardar Factura"}
               </Button>
@@ -326,7 +332,7 @@ export function CrearFacturaForm({ clientes, productos, tiposCliente, deudas }: 
                       const total_linea = subtotal_base + iva;
 
                       return (
-                          <div key={field.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 border rounded-lg relative">
+                          <div key={field.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 border rounded-lg relative items-end">
                               <FormField
                                   control={form.control}
                                   name={`detalles.${index}.id_producto`}
@@ -359,11 +365,7 @@ export function CrearFacturaForm({ clientes, productos, tiposCliente, deudas }: 
                                       </FormItem>
                                   )}
                               />
-                               <FormItem className="md:col-span-1">
-                                  <FormLabel>Stock</FormLabel>
-                                  <Input value={producto?.stock_disponible ?? 'N/A'} readOnly className="bg-muted text-center"/>
-                              </FormItem>
-                              <FormField
+                               <FormField
                                   control={form.control}
                                   name={`detalles.${index}.cantidad`}
                                   render={({ field }) => (
@@ -374,19 +376,27 @@ export function CrearFacturaForm({ clientes, productos, tiposCliente, deudas }: 
                                       </FormItem>
                                   )}
                               />
-                              <FormItem className="md:col-span-2">
-                                  <FormLabel>Precio Unit.</FormLabel>
-                                  <Input value={`$${(producto?.precio || 0).toFixed(2)}`} readOnly className="bg-muted text-right"/>
+                               <FormItem className="md:col-span-1">
+                                  <FormLabel>Stock</FormLabel>
+                                  <Input value={producto?.stock_disponible ?? 'N/A'} readOnly className="bg-muted text-center"/>
                               </FormItem>
                               <FormItem className="md:col-span-2">
+                                  <FormLabel>P. Unitario</FormLabel>
+                                  <Input value={`$${(producto?.precio || 0).toFixed(2)}`} readOnly className="bg-muted text-right"/>
+                              </FormItem>
+                              <FormItem className="md:col-span-1">
+                                  <FormLabel>Subtotal</FormLabel>
+                                  <Input value={`$${subtotal_base.toFixed(2)}`} readOnly className="bg-muted text-right" />
+                              </FormItem>
+                              <FormItem className="md:col-span-1">
                                   <FormLabel>IVA</FormLabel>
                                   <Input value={`$${iva.toFixed(2)}`} readOnly className="bg-muted text-right" />
                               </FormItem>
                               <FormItem className="md:col-span-2">
-                                  <FormLabel>Subtotal</FormLabel>
-                                  <Input value={`$${subtotal_base.toFixed(2)}`} readOnly className="bg-muted text-right" />
+                                  <FormLabel>Total Línea</FormLabel>
+                                  <Input value={`$${total_linea.toFixed(2)}`} readOnly className="bg-muted text-right font-semibold" />
                               </FormItem>
-                               <FormItem className="md:col-span-1 flex items-end">
+                               <FormItem>
                                     <Button type="button" variant="ghost" size="icon" className="text-destructive h-9 w-9" onClick={() => remove(index)} disabled={fields.length <= 1}>
                                         <Trash2 className="h-4 w-4"/>
                                     </Button>
@@ -403,10 +413,6 @@ export function CrearFacturaForm({ clientes, productos, tiposCliente, deudas }: 
           
           <div className="flex flex-col items-end gap-4 p-4 border rounded-lg">
             <div className="flex items-center gap-4">
-                <Button type="button" variant="outline" onClick={handleCreditCheck} disabled={isCreditCheckDisabled}>
-                    <BadgeAlert className="mr-2 h-4 w-4" />
-                    Verificar Crédito
-                </Button>
                 <div className="text-xl font-bold">Total Factura:</div>
                 <div className="text-2xl font-bold text-primary">${totalFactura.toFixed(2)}</div>
             </div>
