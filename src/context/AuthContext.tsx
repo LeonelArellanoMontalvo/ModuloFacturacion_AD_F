@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
@@ -16,6 +17,7 @@ interface User {
   usuario: string;
   id_modulo: string;
   permisos: Permiso[];
+  rawPermisos?: string;
 }
 
 interface AuthContextType {
@@ -62,16 +64,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       body: JSON.stringify({ usuario, contrasena, id_modulo: 'FAC' }),
     });
 
-    const data = await response.json();
+    const rawResponseText = await response.text();
 
     if (!response.ok) {
-      throw new Error(data.message || 'Credenciales incorrectas.');
+        try {
+            const errorData = JSON.parse(rawResponseText);
+            throw new Error(errorData.message || 'Credenciales incorrectas.');
+        } catch (e) {
+            throw new Error(rawResponseText || 'Credenciales incorrectas.');
+        }
     }
+
+    const data = JSON.parse(rawResponseText);
 
     const userData: User = {
       usuario,
       id_modulo: 'FAC',
       permisos: data.permisos,
+      rawPermisos: rawResponseText,
     };
 
     setUser(userData);
@@ -91,6 +101,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const hasPermission = useCallback((subModulo: string, accion: 'C' | 'R' | 'U' | 'D'): boolean => {
     if (isDirectAccess) return true;
     if (!user) return false;
+
+    // The dashboard is a special case, always visible if the user is logged in
+    if (subModulo === 'Dashboard') return true;
 
     const permiso = user.permisos.find(p => p.nombre_permiso.toLowerCase() === subModulo.toLowerCase());
     if (!permiso || !permiso.estado) return false;
