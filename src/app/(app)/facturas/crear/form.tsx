@@ -318,7 +318,7 @@ export function CrearFacturaForm({ clientes, productos, tiposCliente, deudas }: 
                       const precio_unitario = producto?.precio || 0;
                       const subtotal_base = precio_unitario * cantidad;
                       const iva = producto?.graba_iva ? subtotal_base * IVA_RATE : 0;
-                      const subtotal_con_iva = subtotal_base + iva;
+                      const total_linea = subtotal_base + iva;
 
                       return (
                           <div key={field.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 border rounded-lg relative">
@@ -354,11 +354,15 @@ export function CrearFacturaForm({ clientes, productos, tiposCliente, deudas }: 
                                       </FormItem>
                                   )}
                               />
+                               <FormItem className="md:col-span-1">
+                                  <FormLabel>Stock</FormLabel>
+                                  <Input value={producto?.stock_disponible ?? 'N/A'} readOnly className="bg-muted text-center"/>
+                              </FormItem>
                               <FormField
                                   control={form.control}
                                   name={`detalles.${index}.cantidad`}
                                   render={({ field }) => (
-                                      <FormItem className="md:col-span-2">
+                                      <FormItem className="md:col-span-1">
                                           <FormLabel>Cantidad</FormLabel>
                                           <FormControl><Input type="number" min="1" {...field} /></FormControl>
                                           <FormMessage />
@@ -366,24 +370,22 @@ export function CrearFacturaForm({ clientes, productos, tiposCliente, deudas }: 
                                   )}
                               />
                               <FormItem className="md:col-span-2">
-                                  <FormLabel>Stock Disp.</FormLabel>
-                                  <Input value={producto?.stock_disponible ?? 'N/A'} readOnly className="bg-muted"/>
-                              </FormItem>
-                              <FormItem className="md:col-span-1">
-                                  <FormLabel>IVA</FormLabel>
-                                  <Input value={producto ? (producto.graba_iva ? 'Sí' : 'No') : 'N/A'} readOnly className="bg-muted text-center" />
-                              </FormItem>
-                              <FormItem className="md:col-span-2">
                                   <FormLabel>Precio Unit.</FormLabel>
                                   <Input value={`$${(producto?.precio || 0).toFixed(2)}`} readOnly className="bg-muted text-right"/>
                               </FormItem>
                               <FormItem className="md:col-span-2">
-                                  <FormLabel>Subtotal</FormLabel>
-                                  <Input value={`$${subtotal_con_iva.toFixed(2)}`} readOnly className="bg-muted text-right" />
+                                  <FormLabel>IVA</FormLabel>
+                                  <Input value={`$${iva.toFixed(2)}`} readOnly className="bg-muted text-right" />
                               </FormItem>
-                              <Button type="button" variant="ghost" size="icon" className="text-destructive absolute top-1 right-1" onClick={() => remove(index)} disabled={fields.length <= 1}>
-                                  <Trash2 className="h-4 w-4"/>
-                              </Button>
+                              <FormItem className="md:col-span-2">
+                                  <FormLabel>Subtotal</FormLabel>
+                                  <Input value={`$${subtotal_base.toFixed(2)}`} readOnly className="bg-muted text-right" />
+                              </FormItem>
+                               <FormItem className="md:col-span-1 flex items-end">
+                                    <Button type="button" variant="ghost" size="icon" className="text-destructive h-9 w-9" onClick={() => remove(index)} disabled={fields.length <= 1}>
+                                        <Trash2 className="h-4 w-4"/>
+                                    </Button>
+                               </FormItem>
                           </div>
                       )
                   })}
@@ -425,5 +427,3 @@ export function CrearFacturaForm({ clientes, productos, tiposCliente, deudas }: 
     </>
   )
 }
-
-    
