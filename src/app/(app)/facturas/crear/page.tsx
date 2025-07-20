@@ -33,7 +33,10 @@ async function getData(): Promise<{ clientes: Cliente[], productos: Producto[], 
         let deudas: DeudaCliente[] = [];
         if (deudasRes.ok) {
             const deudasData: { id_cliente: number; total_deuda: number }[] = await deudasRes.json();
-            deudas = deudasData || [];
+            deudas = deudasData.map(d => ({
+                id_cliente: d.id_cliente,
+                total_deuda: Number(d.total_deuda) || 0 // Aseguramos que sea un número
+            }));
         } else {
             console.warn("Could not fetch debt data, assuming zero debt for all clients.");
         }
