@@ -213,3 +213,22 @@ export async function deleteFactura(id: number) {
     return { error: "No se pudo eliminar la factura." };
   }
 }
+
+export async function updateFacturaStatus(id: number, facturaData: any) {
+  const payload = {
+    ...facturaData,
+    estado_factura: 'Pagado',
+  };
+  try {
+    await apiCall(`/facturas/${id}/`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    revalidatePath('/facturas');
+    return { success: true };
+  } catch (error) {
+    console.error(`Error updating factura ${id} status:`, error);
+    return { error: "No se pudo actualizar el estado de la factura." };
+  }
+}
