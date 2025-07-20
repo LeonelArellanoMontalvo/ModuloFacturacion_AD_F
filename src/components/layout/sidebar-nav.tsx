@@ -13,7 +13,7 @@ import { useAuth } from "@/context/AuthContext";
 
 const allNavItems = [
   { href: "/dashboard", label: "Dashboard", icon: Home, subModulo: 'Dashboard' },
-  { href: "/tipo-clientes", label: "Tipos de Cliente", icon: Tag, subModulo: 'Tipo de Clientes' },
+  { href: "/tipo-clientes", label: "Tipos de Cliente", icon: Tag, subModulo: 'Tipos de Cliente' },
   { href: "/clientes", label: "Clientes", icon: Users, subModulo: 'Clientes' },
   { href: "/facturas", label: "Facturas", icon: FileText, subModulo: 'Facturas' },
   { href: "/productos", label: "Productos", icon: Package, subModulo: 'Productos' },
