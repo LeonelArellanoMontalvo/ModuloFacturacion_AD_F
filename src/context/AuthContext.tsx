@@ -105,6 +105,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // The dashboard is a special case, always visible if the user is logged in
     if (subModulo === 'Dashboard') return true;
 
+    // TEMP: Allow access to reports for now for development
+    if (subModulo.startsWith('Reporte')) return true;
+
     const permiso = user.permisos.find(p => p.nombre_permiso.toLowerCase() === subModulo.toLowerCase());
     if (!permiso || !permiso.estado) return false;
 

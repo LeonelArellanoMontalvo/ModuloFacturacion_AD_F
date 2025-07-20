@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Users, FileText, Tag, Package, ShieldQuestion } from 'lucide-react';
+import { Home, Users, FileText, Tag, Package, BarChart3 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import {
   SidebarMenu,
@@ -17,6 +17,8 @@ const allNavItems = [
   { href: "/clientes", label: "Clientes", icon: Users, subModulo: 'Clientes' },
   { href: "/facturas", label: "Facturas", icon: FileText, subModulo: 'Facturas' },
   { href: "/productos", label: "Productos", icon: Package, subModulo: 'Productos' },
+  { href: "/reportes/clientes", label: "Reporte Clientes", icon: BarChart3, subModulo: 'Reportes Clientes' },
+  { href: "/reportes/facturas", label: "Reporte Facturas", icon: BarChart3, subModulo: 'Reportes Facturas' },
 ];
 
 export function SidebarNav() {
@@ -34,7 +36,7 @@ export function SidebarNav() {
       {navItems.map((item) => (
         <SidebarMenuItem key={item.href}>
           <SidebarMenuButton
-            isActive={pathname === item.href}
+            isActive={pathname.startsWith(item.href)}
             tooltip={item.label}
             asChild
           >
