@@ -161,6 +161,24 @@ export const getColumns = (
       }
     },
     {
+      accessorKey: "tipo_pago",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Tipo de Pago
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        )
+      },
+      cell: ({ row }) => {
+        const tipoPago = row.original.tipo_pago;
+        return <div className="capitalize">{tipoPago}</div>;
+      }
+    },
+    {
       accessorKey: "monto_total",
       header: ({ column }) => {
           return (
