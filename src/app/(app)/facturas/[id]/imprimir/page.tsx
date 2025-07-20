@@ -93,24 +93,20 @@ export default async function ImprimirFacturaPage({ params }: { params: { id: st
         }
     };
 
-    let subtotalSinIva = 0;
+    let subtotalGeneral = 0;
     let totalIva = 0;
 
     detalles.forEach(item => {
         const producto = productos.find(p => p.id_producto === item.id_producto);
         const precioUnitario = parseFloat(item.precio_unitario);
         const cantidad = item.cantidad;
-        const totalProducto = precioUnitario * cantidad;
-
+        const subtotalProducto = precioUnitario * cantidad;
+        
+        subtotalGeneral += subtotalProducto;
         if (producto?.graba_iva) {
-            subtotalSinIva += totalProducto;
-            totalIva += totalProducto * IVA_RATE;
-        } else {
-            subtotalSinIva += totalProducto;
+            totalIva += subtotalProducto * IVA_RATE;
         }
     });
-
-    const montoTotalCalculado = subtotalSinIva + totalIva;
     
     const formattedDate = formatDate(factura.fecha_factura);
     const fileName = `${factura.numero_factura} - ${cliente.nombre} ${cliente.apellido} - ${formattedDate.replace(/\//g, '-')}`;
@@ -168,23 +164,31 @@ export default async function ImprimirFacturaPage({ params }: { params: { id: st
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead className="w-[100px]">ID Prod.</TableHead>
                                         <TableHead>Producto</TableHead>
-                                        <TableHead className="text-center">Cantidad</TableHead>
-                                        <TableHead className="text-right">Precio Unit.</TableHead>
+                                        <TableHead className="text-center">Cant.</TableHead>
+                                        <TableHead className="text-right">P. Unitario</TableHead>
+                                        <TableHead className="text-right">IVA</TableHead>
                                         <TableHead className="text-right">Subtotal</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {detalles.map(item => (
-                                        <TableRow key={item.id_detalle_factura}>
-                                            <TableCell>{item.id_producto}</TableCell>
-                                            <TableCell>{item.nombre}</TableCell>
-                                            <TableCell className="text-center">{item.cantidad}</TableCell>
-                                            <TableCell className="text-right">${parseFloat(item.precio_unitario).toFixed(2)}</TableCell>
-                                            <TableCell className="text-right">${parseFloat(item.total_producto).toFixed(2)}</TableCell>
-                                        </TableRow>
-                                    ))}
+                                    {detalles.map(item => {
+                                        const producto = productos.find(p => p.id_producto === item.id_producto);
+                                        const precioUnitario = parseFloat(item.precio_unitario);
+                                        const cantidad = item.cantidad;
+                                        const subtotalProducto = precioUnitario * cantidad;
+                                        const ivaProducto = producto?.graba_iva ? subtotalProducto * IVA_RATE : 0;
+                                        
+                                        return (
+                                            <TableRow key={item.id_detalle_factura}>
+                                                <TableCell>{item.nombre}</TableCell>
+                                                <TableCell className="text-center">{cantidad}</TableCell>
+                                                <TableCell className="text-right">${precioUnitario.toFixed(2)}</TableCell>
+                                                <TableCell className="text-right">${ivaProducto.toFixed(2)}</TableCell>
+                                                <TableCell className="text-right">${subtotalProducto.toFixed(2)}</TableCell>
+                                            </TableRow>
+                                        );
+                                    })}
                                 </TableBody>
                             </Table>
                         </div>
@@ -195,7 +199,7 @@ export default async function ImprimirFacturaPage({ params }: { params: { id: st
                             <div className="w-full max-w-sm space-y-2 text-right">
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">Subtotal:</span>
-                                    <span>${subtotalSinIva.toFixed(2)}</span>
+                                    <span>${subtotalGeneral.toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">IVA ({IVA_RATE * 100}%):</span>
@@ -214,5 +218,3 @@ export default async function ImprimirFacturaPage({ params }: { params: { id: st
         </>
     );
 }
-
-    
