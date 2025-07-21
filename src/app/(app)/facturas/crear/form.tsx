@@ -405,7 +405,13 @@ export function CrearFacturaForm({ clientes, productos, tiposCliente, deudas }: 
                       )
                   })}
 
-                  <Button type="button" variant="outline" size="sm" onClick={() => append({ id_producto: undefined, cantidad: 1 })}>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => append({ id_producto: undefined, cantidad: 1 })}
+                    disabled={fields.length >= productos.length}
+                  >
                       <Plus className="mr-2 h-4 w-4" /> Agregar Detalle
                   </Button>
               </CardContent>
