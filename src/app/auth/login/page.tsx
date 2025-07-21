@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useTransition } from 'react';
@@ -103,11 +104,6 @@ export default function LoginPage() {
             </form>
           </Form>
         </CardContent>
-        <CardFooter className="flex justify-center">
-            <Button variant="link" asChild>
-                <Link href="/">Volver al Inicio</Link>
-            </Button>
-        </CardFooter>
       </Card>
     </div>
   );

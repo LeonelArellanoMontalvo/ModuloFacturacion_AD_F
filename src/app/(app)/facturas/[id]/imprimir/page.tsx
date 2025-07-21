@@ -138,10 +138,9 @@ export default async function ImprimirFacturaPage({ params }: { params: { id: st
                                 </div>
                             </div>
                             <div className="text-right">
-                                <h3 className="text-lg font-bold font-headline">APDIS Manager</h3>
-                                <p className="text-sm text-muted-foreground">Av. Siempre Viva 123, Quito</p>
-                                <p className="text-sm text-muted-foreground">info@apdis.com</p>
-                                <p className="text-sm text-muted-foreground">(02) 234-5678</p>
+                                <h3 className="text-lg font-bold font-headline">Módulo de facturación</h3>
+                                <p className="text-sm text-muted-foreground">Universidad Técnica del Norte - Ibarra</p>
+                                <p className="text-sm text-muted-foreground">info@modulofacturacion.com</p>
                             </div>
                         </div>
                     </CardHeader>

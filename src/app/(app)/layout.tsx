@@ -19,14 +19,14 @@ import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const { user, logout, loading, isDirectAccess } = useAuth();
+  const { user, logout, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !user && !isDirectAccess) {
+    if (!loading && !user) {
       router.push("/auth/login");
     }
-  }, [user, loading, isDirectAccess, router]);
+  }, [user, loading, router]);
 
   if (loading) {
     return (
@@ -36,7 +36,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!user && !isDirectAccess) {
+  if (!user) {
     return null; // or a loading indicator
   }
 
@@ -48,14 +48,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold font-headline">
               A
             </div>
-            <span className="font-bold text-lg font-headline">APDIS Manager</span>
+            <span className="font-bold text-lg font-headline">Módulo de facturación</span>
           </div>
         </SidebarHeader>
         <SidebarContent>
           <SidebarNav />
         </SidebarContent>
         <SidebarFooter>
-          {user ? (
+          {user && (
             <div className="w-full space-y-2">
                <div className="flex items-center gap-2">
                   <Avatar className="h-8 w-8">
@@ -72,24 +72,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     Cerrar Sesión
                 </Button>
             </div>
-          ) : (
-             <div className="flex items-center gap-2">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src="https://placehold.co/100x100.png" alt="Admin" data-ai-hint="user avatar" />
-                  <AvatarFallback>AD</AvatarFallback>
-                </Avatar>
-                <div className="flex flex-col">
-                  <span className="text-sm font-semibold">Admin</span>
-                  <span className="text-xs text-muted-foreground">(Acceso Directo)</span>
-                </div>
-              </div>
           )}
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
         <header className="flex items-center justify-between p-4 border-b">
           <SidebarTrigger />
-          <h1 className="text-xl font-semibold font-headline">Dashboard</h1>
+          <h1 className="text-xl font-semibold font-headline">Grupo #3</h1>
         </header>
         <main className="p-4 md:p-6">{children}</main>
       </SidebarInset>

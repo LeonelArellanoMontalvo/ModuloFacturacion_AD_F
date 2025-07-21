@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo } from "react";
@@ -42,7 +43,7 @@ export function ReporteClientesClient({ data, reportDate, fileName }: ReporteCli
                     </div>
                 </div>
                  <div className="text-right">
-                    <p className="text-sm font-semibold">APDIS Manager</p>
+                    <p className="text-sm font-semibold">Módulo de facturación/Venta</p>
                     <p className="text-xs text-muted-foreground">Fecha de Reporte: {reportDate}</p>
                 </div>
             </div>

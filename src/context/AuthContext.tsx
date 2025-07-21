@@ -23,11 +23,9 @@ interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  isDirectAccess: boolean;
   login: (usuario: string, contrasena: string) => Promise<void>;
   logout: () => void;
   hasPermission: (subModulo: string, accion: 'C' | 'R' | 'U' | 'D') => boolean;
-  setDirectAccess: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -35,23 +33,17 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isDirectAccess, setIsDirectAccessState] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     try {
       const storedUser = localStorage.getItem('user');
-      const directAccess = localStorage.getItem('isDirectAccess') === 'true';
-
-      if (directAccess) {
-          setIsDirectAccessState(true);
-      } else if (storedUser) {
+      if (storedUser) {
         setUser(JSON.parse(storedUser));
       }
     } catch (error) {
       console.error("Failed to parse user from localStorage", error);
       localStorage.removeItem('user');
-      localStorage.removeItem('isDirectAccess');
     } finally {
       setLoading(false);
     }
@@ -85,21 +77,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     setUser(userData);
-    setIsDirectAccessState(false);
     localStorage.setItem('user', JSON.stringify(userData));
-    localStorage.removeItem('isDirectAccess');
   };
 
   const logout = useCallback(() => {
     setUser(null);
-    setIsDirectAccessState(false);
     localStorage.removeItem('user');
-    localStorage.removeItem('isDirectAccess');
     router.push('/auth/login');
   }, [router]);
 
   const hasPermission = useCallback((subModulo: string, accion: 'C' | 'R' | 'U' | 'D'): boolean => {
-    if (isDirectAccess) return true;
     if (!user) return false;
 
     // The dashboard is a special case, always visible if the user is logged in
@@ -122,17 +109,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!permiso || !permiso.estado) return false;
 
     return permiso.descripcion.includes(accion);
-  }, [user, isDirectAccess]);
-
-  const setDirectAccess = () => {
-    setIsDirectAccessState(true);
-    setUser(null);
-    localStorage.setItem('isDirectAccess', 'true');
-    localStorage.removeItem('user');
-  };
+  }, [user]);
 
   return (
-    <AuthContext.Provider value={{ user, loading, isDirectAccess, login, logout, hasPermission, setDirectAccess }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, hasPermission }}>
       {children}
     </AuthContext.Provider>
   );

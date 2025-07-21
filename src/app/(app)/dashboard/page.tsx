@@ -38,7 +38,7 @@ async function getStats(): Promise<Stats> {
 
 
 export default function DashboardPage() {
-    const { user, isDirectAccess } = useAuth();
+    const { user } = useAuth();
     const [stats, setStats] = useState<Stats | null>(null);
 
     useEffect(() => {
@@ -47,7 +47,7 @@ export default function DashboardPage() {
 
     return (
       <div>
-        <PageHeader title="Bienvenido a APDIS Manager" />
+        <PageHeader title="Bienvenido al módulo de facturación / ventas" />
         <p className="mb-6 text-muted-foreground">
           Aquí tiene un resumen de su negocio.
         </p>
@@ -100,13 +100,6 @@ export default function DashboardPage() {
                         {JSON.stringify(JSON.parse(user.rawPermisos), null, 2)}
                     </code>
                 </pre>
-            </div>
-        )}
-
-        {isDirectAccess && (
-            <div className="mt-8">
-                <h3 className="text-lg font-semibold mb-2">Modo de Acceso</h3>
-                <p className="p-4 bg-muted rounded-lg text-sm">Acceso Directo (Sin restricciones de permisos)</p>
             </div>
         )}
       </div>
