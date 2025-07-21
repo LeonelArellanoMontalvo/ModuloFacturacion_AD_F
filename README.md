@@ -73,3 +73,33 @@ No deberías tener problemas significativos. El archivo `package.json` define la
     ```
 
 ¡Y listo! Tu proyecto estará disponible en GitHub.
+
+---
+
+## Despliegue en Vercel (Gratis)
+
+Vercel es la plataforma creada por los desarrolladores de Next.js, por lo que la integración es perfecta. Ofrecen un plan "Hobby" gratuito ideal para desplegar este tipo de proyectos.
+
+### Paso 1: Sube tu proyecto a GitHub
+
+Si aún no lo has hecho, sigue los pasos de la sección anterior para subir tu código a un repositorio de GitHub. Este es un requisito indispensable para que Vercel pueda acceder a tu código.
+
+### Paso 2: Crea una cuenta en Vercel
+
+1.  Ve a [vercel.com](https://vercel.com/signup).
+2.  La forma más sencilla es registrarte usando tu cuenta de GitHub. Haz clic en **"Continue with GitHub"** y autoriza la conexión.
+
+### Paso 3: Importa tu proyecto desde Vercel
+
+1.  Una vez dentro de tu dashboard de Vercel, haz clic en **"Add New..."** y selecciona **"Project"**.
+2.  Vercel buscará tus repositorios de GitHub. Encuentra el repositorio de este proyecto en la lista y haz clic en el botón **"Import"** que está a su lado.
+
+### Paso 4: Configura y Despliega
+
+1.  **Configuración del Proyecto:** ¡Aquí viene la magia! Vercel detectará automáticamente que es un proyecto Next.js y pre-configurará todo por ti. No necesitas cambiar ninguna de las opciones de "Build & Development Settings".
+2.  **Variables de Entorno:** Para este proyecto en particular, no necesitas configurar ninguna variable de entorno, ya que todas las URLs de las APIs son públicas.
+3.  **Despliegue:** Simplemente haz clic en el botón **"Deploy"**.
+
+Vercel comenzará el proceso de compilación y despliegue. Tomará unos minutos. Una vez finalizado, te mostrará una pantalla de felicitaciones con la URL pública de tu proyecto.
+
+¡Y eso es todo! Tu aplicación estará en línea y accesible para todo el mundo. Cada vez que hagas un `git push` a la rama `main` de tu repositorio, Vercel automáticamente desplegará los nuevos cambios.
