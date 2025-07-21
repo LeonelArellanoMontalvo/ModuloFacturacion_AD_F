@@ -105,8 +105,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // The dashboard is a special case, always visible if the user is logged in
     if (subModulo === 'Dashboard') return true;
 
-    // TEMP: Allow access to reports for now for development
-    if (subModulo.startsWith('Reporte')) return true;
+    // Report permissions logic
+    if (subModulo === 'Reportes Clientes') {
+        const clientePermiso = user.permisos.find(p => p.nombre_permiso.toLowerCase() === 'clientes' && p.estado);
+        if (!clientePermiso) return false;
+        return clientePermiso.descripcion === 'CRU' || clientePermiso.descripcion === 'CRUD';
+    }
+
+    if (subModulo === 'Reportes Facturas') {
+        const facturaPermiso = user.permisos.find(p => p.nombre_permiso.toLowerCase() === 'facturas' && p.estado);
+        if (!facturaPermiso) return false;
+        return facturaPermiso.descripcion === 'CRU' || facturaPermiso.descripcion === 'CRUD';
+    }
 
     const permiso = user.permisos.find(p => p.nombre_permiso.toLowerCase() === subModulo.toLowerCase());
     if (!permiso || !permiso.estado) return false;

@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -25,11 +26,15 @@ export function SidebarNav() {
   const pathname = usePathname();
   const { hasPermission } = useAuth();
   
-  // The first item is always the Dashboard, which should always be visible.
-  const navItems = [
-    allNavItems[0], 
-    ...allNavItems.slice(1).filter(item => hasPermission(item.subModulo, 'R'))
-  ];
+  const navItems = allNavItems.filter(item => {
+    // For reports, the check is different, we just check for 'R' as hasPermission will handle the complex logic
+    if (item.subModulo.startsWith('Reporte')) {
+        return hasPermission(item.subModulo, 'R');
+    }
+    // For other modules, we check for 'R' permission to show them in the nav
+    return hasPermission(item.subModulo, 'R');
+  });
+
 
   return (
     <SidebarMenu>
