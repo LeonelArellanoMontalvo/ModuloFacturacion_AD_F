@@ -3,9 +3,11 @@
 
 import { PageHeader } from "@/components/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Users, FileText, Tag } from "lucide-react";
+import { Users, FileText, Tag, CheckCircle, XCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 
 interface Stats {
     tiposCount: number;
@@ -92,15 +94,40 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        {user && user.rawPermisos && (
-            <div className="mt-8">
-                <h3 className="text-lg font-semibold mb-2">Respuesta API Seguridad (Temporal)</h3>
-                <pre className="p-4 bg-muted rounded-lg text-sm overflow-x-auto">
-                    <code>
-                        {JSON.stringify(JSON.parse(user.rawPermisos), null, 2)}
-                    </code>
-                </pre>
-            </div>
+        {user && user.permisos && (
+            <Card className="mt-8">
+                <CardHeader>
+                    <CardTitle>Permisos de Usuario</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Módulo</TableHead>
+                                <TableHead>Acciones Permitidas</TableHead>
+                                <TableHead className="text-center">Estado</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {user.permisos.map((permiso) => (
+                                <TableRow key={permiso.id_permiso}>
+                                    <TableCell className="font-medium">{permiso.nombre_permiso}</TableCell>
+                                    <TableCell>
+                                        <Badge variant="secondary">{permiso.descripcion}</Badge>
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        {permiso.estado ? (
+                                            <CheckCircle className="h-5 w-5 text-green-500 inline-block" />
+                                        ) : (
+                                            <XCircle className="h-5 w-5 text-red-500 inline-block" />
+                                        )}
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
         )}
       </div>
     );

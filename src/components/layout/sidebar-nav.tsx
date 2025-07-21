@@ -13,8 +13,8 @@ import {
 import { useAuth } from "@/context/AuthContext";
 
 const allNavItems = [
-  { href: "/dashboard", label: "Dashboard", icon: Home, subModulo: 'Dashboard' },
-  { href: "/tipo-clientes", label: "Tipos de Cliente", icon: Tag, subModulo: 'Tipos de Cliente' },
+  { href: "/dashboard", label: "Inicio", icon: Home, subModulo: 'Inicio' },
+  { href: "/tipo-clientes", label: "Tipos de Cliente", icon: Tag, subModulo: 'Tipo de Clientes' },
   { href: "/clientes", label: "Clientes", icon: Users, subModulo: 'Clientes' },
   { href: "/facturas", label: "Facturas", icon: FileText, subModulo: 'Facturas' },
   { href: "/productos", label: "Productos", icon: Package, subModulo: 'Productos' },
@@ -41,7 +41,7 @@ export function SidebarNav() {
       {navItems.map((item) => (
         <SidebarMenuItem key={item.href}>
           <SidebarMenuButton
-            isActive={pathname.startsWith(item.href)}
+            isActive={pathname.startsWith(item.href) || (item.href === '/dashboard' && pathname === '/')}
             tooltip={item.label}
             asChild
           >

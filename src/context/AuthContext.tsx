@@ -90,7 +90,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!user) return false;
 
     // The dashboard is a special case, always visible if the user is logged in
-    if (subModulo === 'Dashboard') return true;
+    if (subModulo === 'Inicio') return true;
 
     // Report permissions logic
     if (subModulo === 'Reportes Clientes') {
