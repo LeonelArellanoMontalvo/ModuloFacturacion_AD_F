@@ -2,11 +2,77 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 import { tipoClienteSchema, clienteSchema, facturaSchema } from "@/lib/schemas";
+import { cookies } from 'next/headers';
 
 const API_URL = "https://apdis-p5v5.vercel.app/api";
+const AUDITORIA_URL = "https://aplicacion-de-seguridad-v2.onrender.com/api/auditoria";
+
+// Helper function to get user from cookies
+function getUserFromCookies() {
+  const cookieStore = cookies();
+  const userCookie = cookieStore.get('user');
+  if (userCookie) {
+    try {
+      return JSON.parse(userCookie.value);
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+// Generic function for sending audit logs
+async function enviarAuditoria({
+  accion,
+  tabla,
+  details,
+  id_registro
+}: {
+  accion: 'CREATE' | 'UPDATE' | 'DELETE';
+  tabla: string;
+  details: object;
+  id_registro?: number | string | null;
+}) {
+  const user = getUserFromCookies();
+  if (!user || !user.token) {
+    console.error("Audit Error: User or token not found.");
+    return;
+  }
+
+  const { usuario, token } = user;
+  
+  const payload = {
+    accion: accion.toUpperCase(),
+    modulo: "FACTURACION",
+    tabla,
+    id_usuario: usuario, // Assuming the audit API can resolve the user by their username
+    details: JSON.stringify({ ...details, id_registro }),
+    nombre_rol: "Sistema", // Or extract a role from the user object if available
+  };
+
+  try {
+    const response = await fetch(AUDITORIA_URL, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+        const errorBody = await response.text();
+        console.error(`Audit API Error (${response.status}):`, errorBody);
+    } else {
+        console.log(`Auditoría enviada con éxito para la acción: ${accion} en la tabla: ${tabla}`);
+    }
+  } catch (error) {
+    console.error("Error al enviar auditoría:", (error as Error).message);
+  }
+}
+
 
 // Generic function for API calls
 async function apiCall(path: string, options: RequestInit) {
@@ -16,10 +82,8 @@ async function apiCall(path: string, options: RequestInit) {
     if (!response.ok) {
       const errorBody = await response.text();
       console.error(`API Error (${response.status}) on ${options.method} ${url}:`, errorBody);
-      // Throw the body so it can be parsed by the calling function
       throw new Error(errorBody);
     }
-    // For DELETE requests, response might be empty
     if (response.status === 204 || response.headers.get('content-length') === '0') {
       return null;
     }
@@ -37,12 +101,18 @@ export async function createTipoCliente(formData: z.infer<typeof tipoClienteSche
     return { error: "Datos inválidos." };
   }
   try {
-    await apiCall('/tipo_clientes/', {
+    const newRecord = await apiCall('/tipo_clientes/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(validatedFields.data),
     });
     revalidatePath('/tipo-clientes');
+    await enviarAuditoria({
+      accion: 'CREATE',
+      tabla: 'tipo_clientes',
+      details: validatedFields.data,
+      id_registro: newRecord?.id_tipcli
+    });
     return { success: "Tipo de cliente creado." };
   } catch (error: any) {
     const message = error.message as string;
@@ -65,6 +135,12 @@ export async function updateTipoCliente(id: number, formData: z.infer<typeof tip
       body: JSON.stringify(validatedFields.data),
     });
     revalidatePath('/tipo-clientes');
+    await enviarAuditoria({
+      accion: 'UPDATE',
+      tabla: 'tipo_clientes',
+      id_registro: id,
+      details: validatedFields.data,
+    });
     return { success: "Tipo de cliente actualizado." };
   } catch (error: any) {
     const message = error.message as string;
@@ -79,6 +155,12 @@ export async function deleteTipoCliente(id: number) {
   try {
     await apiCall(`/tipo_clientes/${id}/`, { method: 'DELETE' });
     revalidatePath('/tipo-clientes');
+    await enviarAuditoria({
+      accion: 'DELETE',
+      tabla: 'tipo_clientes',
+      id_registro: id,
+      details: { message: `Tipo cliente con id ${id} eliminado.` },
+    });
     return { success: true };
   } catch (error) {
     return { error: "No se pudo eliminar el tipo de cliente. Es posible que esté en uso." };
@@ -115,12 +197,18 @@ export async function createCliente(formData: z.infer<typeof clienteSchema>) {
         fecha_nacimiento: fecha_nacimiento.toISOString().split('T')[0],
     };
     try {
-        await apiCall('/clientes/', {
+        const newRecord = await apiCall('/clientes/', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
         });
         revalidatePath('/clientes');
+        await enviarAuditoria({
+          accion: 'CREATE',
+          tabla: 'clientes',
+          id_registro: newRecord?.id_cliente,
+          details: payload,
+        });
         return { success: "Cliente creado." };
     } catch (error: any) {
         return handleClienteError(error);
@@ -144,6 +232,12 @@ export async function updateCliente(id: number, formData: z.infer<typeof cliente
             body: JSON.stringify(payload),
         });
         revalidatePath('/clientes');
+        await enviarAuditoria({
+          accion: 'UPDATE',
+          tabla: 'clientes',
+          id_registro: id,
+          details: payload,
+        });
         return { success: "Cliente actualizado." };
     } catch (error: any) {
         return handleClienteError(error);
@@ -154,6 +248,12 @@ export async function deleteCliente(id: number) {
   try {
     await apiCall(`/clientes/${id}/`, { method: 'DELETE' });
     revalidatePath('/clientes');
+    await enviarAuditoria({
+      accion: 'DELETE',
+      tabla: 'clientes',
+      id_registro: id,
+      details: { message: `Cliente con id ${id} eliminado.` },
+    });
     return { success: true };
   } catch (error) {
     return { error: "No se pudo eliminar el cliente. Es posible que tenga facturas asociadas." };
@@ -171,18 +271,16 @@ export async function createFactura(formData: z.infer<typeof facturaSchema>) {
   const { header, detalles } = validatedFields.data;
 
   try {
-    // 1. Create invoice header
     const newFactura = await apiCall('/facturas/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...header, monto_total: 0 }), // monto_total is calculated in the backend
+      body: JSON.stringify({ ...header, monto_total: 0 }),
     });
 
     if (!newFactura || !newFactura.id_factura) {
       throw new Error("No se pudo crear la cabecera de la factura.");
     }
 
-    // 2. Create invoice details
     const detallesPayload = {
       id_factura: newFactura.id_factura,
       productos: detalles,
@@ -195,6 +293,12 @@ export async function createFactura(formData: z.infer<typeof facturaSchema>) {
     });
 
     revalidatePath('/facturas');
+    await enviarAuditoria({
+      accion: 'CREATE',
+      tabla: 'facturas',
+      id_registro: newFactura.id_factura,
+      details: { header, detalles },
+    });
     return { success: true, newFacturaId: newFactura.id_factura };
 
   } catch (error) {
@@ -208,6 +312,12 @@ export async function deleteFactura(id: number) {
   try {
     await apiCall(`/facturas/${id}/`, { method: 'DELETE' });
     revalidatePath('/facturas');
+     await enviarAuditoria({
+      accion: 'DELETE',
+      tabla: 'facturas',
+      id_registro: id,
+      details: { message: `Factura con id ${id} eliminada.` },
+    });
     return { success: true };
   } catch (error) {
     return { error: "No se pudo eliminar la factura." };
@@ -219,41 +329,36 @@ export async function updateFacturaStatusBatch(facturaIds: number[]) {
     return { success: true, updatedCount: 0 };
   }
 
-  // Since we don't have a true batch update endpoint,
-  // we'll have to fetch, modify, and PUT each one.
-  // This is inefficient but necessary with the current API.
   let updatedCount = 0;
   let hasErrors = false;
 
   for (const id of facturaIds) {
     try {
-      // 1. Fetch the existing factura data
       const factura = await apiCall(`/facturas/${id}/`, { method: 'GET' });
       
       if (factura) {
-        // 2. Prepare the payload for update
         const { cliente, detalles, ...facturaPayload } = factura;
-        const payload = {
-          ...facturaPayload,
-          estado_factura: 'Pagado',
-        };
+        const payload = { ...facturaPayload, estado_factura: 'Pagado' };
         
-        // 3. Send the PUT request
         await apiCall(`/facturas/${id}/`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
+        });
+        await enviarAuditoria({
+          accion: 'UPDATE',
+          tabla: 'facturas',
+          id_registro: id,
+          details: { estado_factura: 'Pagado', trigger: 'Sync con Cuentas por Cobrar' },
         });
         updatedCount++;
       }
     } catch (error) {
       console.error(`Failed to update status for factura ${id}:`, error);
       hasErrors = true;
-      // Continue to the next one
     }
   }
 
-  // Revalidate the path only once after all updates are attempted.
   if (updatedCount > 0) {
     revalidatePath('/facturas');
   }

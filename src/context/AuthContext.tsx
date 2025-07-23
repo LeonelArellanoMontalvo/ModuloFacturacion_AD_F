@@ -17,7 +17,7 @@ interface User {
   usuario: string;
   id_modulo: string;
   permisos: Permiso[];
-  rawPermisos?: string;
+  token?: string; 
 }
 
 interface AuthContextType {
@@ -56,24 +56,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       body: JSON.stringify({ usuario, contrasena, id_modulo: 'FAC' }),
     });
 
-    const rawResponseText = await response.text();
-
     if (!response.ok) {
-        try {
-            const errorData = JSON.parse(rawResponseText);
-            throw new Error(errorData.message || 'Credenciales incorrectas.');
-        } catch (e) {
-            throw new Error(rawResponseText || 'Credenciales incorrectas.');
-        }
+      // Don't expose the API error message directly
+      throw new Error('Credenciales incorrectas. Por favor, intente de nuevo.');
     }
 
-    const data = JSON.parse(rawResponseText);
+    const data = await response.json();
 
     const userData: User = {
       usuario,
       id_modulo: 'FAC',
       permisos: data.permisos,
-      rawPermisos: rawResponseText,
+      token: data.token, // Store the token
     };
 
     setUser(userData);

@@ -10,11 +10,10 @@ import { useAuth } from '@/context/AuthContext';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle, LogIn } from 'lucide-react';
-import Link from 'next/link';
 
 const loginSchema = z.object({
   usuario: z.string().min(1, 'El nombre de usuario es requerido.'),
@@ -42,9 +41,12 @@ export default function LoginPage() {
     startTransition(async () => {
       try {
         await login(values.usuario, values.contrasena);
-        router.push('/dashboard');
+        // On successful login, redirect to dashboard
+        // We use router.push to ensure the page reloads and AuthContext is updated
+        router.push('/dashboard'); 
       } catch (err: any) {
-        setError('Credenciales incorrectas. Por favor, intente de nuevo.');
+        // Set a generic error message from the AuthContext
+        setError(err.message);
       }
     });
   };
@@ -103,4 +105,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
