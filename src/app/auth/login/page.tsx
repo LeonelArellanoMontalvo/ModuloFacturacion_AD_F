@@ -44,7 +44,7 @@ export default function LoginPage() {
         await login(values.usuario, values.contrasena);
         router.push('/dashboard');
       } catch (err: any) {
-        setError(err.message || 'Ocurrió un error inesperado.');
+        setError('Credenciales incorrectas. Por favor, intente de nuevo.');
       }
     });
   };
