@@ -45,9 +45,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <Sidebar>
         <SidebarHeader>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold font-headline">
-              A
-            </div>
             <span className="font-bold text-lg font-headline">Módulo de facturación</span>
           </div>
         </SidebarHeader>

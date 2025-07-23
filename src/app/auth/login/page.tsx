@@ -53,11 +53,6 @@ export default function LoginPage() {
     <div className="flex items-center justify-center min-h-screen bg-background">
       <Card className="w-full max-w-md mx-4">
          <CardHeader className="text-center">
-            <div className="flex justify-center mb-4">
-                <div className="w-16 h-16 flex items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold font-headline text-4xl">
-                    A
-                </div>
-            </div>
           <CardTitle className="text-3xl font-bold font-headline">Iniciar Sesión</CardTitle>
           <CardDescription>Ingrese sus credenciales para acceder al sistema</CardDescription>
         </CardHeader>
@@ -108,3 +103,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

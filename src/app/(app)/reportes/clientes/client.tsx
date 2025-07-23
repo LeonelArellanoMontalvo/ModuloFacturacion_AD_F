@@ -38,7 +38,6 @@ export function ReporteClientesClient({ data, reportDate, fileName }: ReporteCli
             <div className="flex justify-between items-start">
                 <div>
                     <div className="flex items-center gap-3">
-                         <div className="w-12 h-12 flex items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold font-headline text-2xl">A</div>
                          <h1 className="text-2xl md:text-3xl font-bold font-headline text-primary">Reporte de Clientes</h1>
                     </div>
                 </div>
