@@ -45,34 +45,55 @@ No deberías tener problemas significativos. El archivo `package.json` define la
     git init
     ```
 
-2.  **Agrega todos los archivos al repositorio**:
-    ```bash
-    git add .
-    ```
+2.  **Crea un nuevo repositorio en GitHub**: Ve a [GitHub.com](https://github.com/new) y crea un nuevo repositorio (no lo inicialices con un `README` o `.gitignore` desde la web).
 
-3.  **Realiza tu primer commit**:
-    ```bash
-    git commit -m "Commit inicial del proyecto APDIS Manager"
-    ```
-
-4.  **Crea un nuevo repositorio en GitHub**: Ve a [GitHub.com](https://github.com/new) y crea un nuevo repositorio (no lo inicialices con un `README` o `.gitignore` desde la web).
-
-5.  **Enlaza tu repositorio local con el de GitHub**: Copia la URL de tu repositorio de GitHub y ejecútala en tu terminal.
+3.  **Enlaza tu repositorio local con el de GitHub**: Copia la URL de tu repositorio de GitHub y ejecútala en tu terminal.
     ```bash
     git remote add origin https://github.com/tu-usuario/nombre-del-repositorio.git
     ```
 
-6.  **Asegúrate de que tu rama principal se llame `main`**:
+#### Trabajando con la rama principal (`main`)
+
+Si quieres subir tus cambios directamente a la rama principal:
+
+1.  **Asegúrate de que tu rama principal se llame `main`**:
     ```bash
     git branch -M main
     ```
 
-7.  **Sube tus archivos a GitHub**:
+2.  **Agrega y confirma tus cambios**:
+    ```bash
+    git add .
+    git commit -m "Commit inicial del proyecto APDIS Manager"
+    ```
+
+3.  **Sube tus archivos a GitHub**:
     ```bash
     git push -u origin main
     ```
 
-¡Y listo! Tu proyecto estará disponible en GitHub.
+#### Trabajando con una nueva rama
+
+Es una buena práctica trabajar en ramas separadas para nuevas funcionalidades o cambios importantes.
+
+1.  **Crea y cámbiate a una nueva rama**: Elige un nombre descriptivo para tu rama (ej: `desarrollo`, `feature/nueva-auditoria`).
+    ```bash
+    git checkout -b nombre-de-la-nueva-rama
+    ```
+
+2.  **Agrega y confirma tus cambios en la nueva rama**:
+    ```bash
+    git add .
+    git commit -m "Descripción de los cambios en esta rama"
+    ```
+
+3.  **Sube la nueva rama a GitHub**: La primera vez que subas la rama, necesitas usar el siguiente comando.
+    ```bash
+    git push -u origin nombre-de-la-nueva-rama
+    ```
+    Después del primer `push`, puedes simplemente usar `git push` para subir futuros cambios desde la misma rama.
+
+¡Y listo! Tu proyecto estará disponible en GitHub en la rama que has creado.
 
 ---
 
@@ -102,4 +123,4 @@ Si aún no lo has hecho, sigue los pasos de la sección anterior para subir tu c
 
 Vercel comenzará el proceso de compilación y despliegue. Tomará unos minutos. Una vez finalizado, te mostrará una pantalla de felicitaciones con la URL pública de tu proyecto.
 
-¡Y eso es todo! Tu aplicación estará en línea y accesible para todo el mundo. Cada vez que hagas un `git push` a la rama `main` de tu repositorio, Vercel automáticamente desplegará los nuevos cambios.
+¡Y eso es todo! Tu aplicación estará en línea y accesible para todo el mundo. Cada vez que hagas un `git push` a la rama `main` de tu repositorio, Vercel automáticamente desplegará los nuevos cambios. Si quieres desplegar otras ramas, también puedes configurarlo fácilmente en los ajustes de tu proyecto en Vercel.
